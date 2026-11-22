@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuantPulse AI - Quantitative Stock Predictor (US & Indian Markets)</title>
+  
+  <!-- Google Fonts & FontAwesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="bg-slate-950 text-slate-100 antialiased min-h-screen">
+
+  <!-- Top Navigation Header -->
+  <header class="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 text-slate-950 text-xl font-black">
+          <i class="fa-solid fa-chart-line"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">QuantPulse AI</h1>
+            <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">v2.0 Quant</span>
+          </div>
+          <p class="text-xs text-slate-400">Institutional-Grade Quantitative Stock Predictor</p>
+        </div>
+      </div>
+
+      <!-- Market Badges & Status -->
+      <div class="flex items-center gap-3 text-xs">
+        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700/60 text-slate-300">
+          <span class="w-2 h-2 rounded-full bg-orange-400 animate-pulse"></span>
+          <span>🇮🇳 <b>NSE / BSE</b> (₹ INR)</span>
+        </div>
+        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700/60 text-slate-300">
+          <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+          <span>🇺🇸 <b>NYSE / NASDAQ</b> ($ USD)</span>
+        </div>
+        <div id="aiStatusBadge" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
+          <i class="fa-solid fa-microchip"></i>
+          <span id="aiStatusText">Ensemble ML Active</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+
+    <!-- Search & Quick Tickers Section -->
+    <section class="space-y-4">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-2xl backdrop-blur-xl relative">
+        <form id="searchForm" class="flex flex-col sm:flex-row gap-3">
+          <div class="relative flex-1">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 text-lg">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </div>
+            <input 
+              type="text" 
+              id="tickerInput" 
+              placeholder="Search any stock or company (e.g. Reliance, TCS, Apple, Tesla, Nifty 50, NVDA...)" 
+              autocomplete="off"
+              class="w-full pl-12 pr-4 py-3.5 bg-slate-950/70 border border-slate-700/80 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all text-sm sm:text-base font-medium shadow-inner"
+            >
+            <!-- Auto-suggestions Dropdown -->
+            <div id="suggestionsDropdown" class="hidden absolute left-0 right-0 top-full mt-2 bg-slate-900/95 border border-slate-700 rounded-xl shadow-2xl overflow-hidden z-30 divide-y divide-slate-800"></div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <select id="marketFilter" class="bg-slate-950/70 border border-slate-700/80 rounded-xl px-4 py-3.5 text-xs sm:text-sm text-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
+              <option value="">Auto-Detect Market</option>
+              <option value="in">🇮🇳 India (NSE / BSE)</option>
+              <option value="us">🇺🇸 US (NYSE / NASDAQ)</option>
+            </select>
+
+            <button 
+              type="submit" 
+              id="submitBtn"
+              class="px-6 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold rounded-xl transition-all shadow-lg shadow-emerald-500/20 active:scale-95 flex items-center justify-center gap-2 text-sm sm:text-base cursor-pointer"
+            >
+              <span>Analyze</span>
+              <i class="fa-solid fa-arrow-right text-xs"></i>
+            </button>
+          </div>
+        </form>
+
+        <!-- Quick Ticker Chips -->
+        <div class="mt-4 pt-4 border-t border-slate-800/80 flex flex-wrap items-center gap-2 text-xs">
+          <span class="text-slate-500 font-semibold mr-1 flex items-center gap-1">
+            <i class="fa-solid fa-bolt text-amber-400"></i> Popular:
+          </span>
+          
+          <!-- Indian Equities -->
+          <button class="quick-chip px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 text-slate-300 hover:text-white transition" data-ticker="Reliance">
+            🇮🇳 Reliance
+          </button>
+          <button class="quick-chip px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 text-slate-300 hover:text-white transition" data-ticker="TCS">
+            🇮🇳 TCS
+          </button>
+          <button class="quick-chip px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 text-slate-300 hover:text-white transition" data-ticker="HDFC Bank">
+            🇮🇳 HDFC Bank
+          </button>
+          <button class="quick-chip px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 text-slate-300 hover:text-white transition" data-ticker="Tata Motors">
+            🇮🇳 Tata Motors
+          </button>
+          <button class="quick-chip px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 text-slate-300 hover:text-white transition" data-ticker="NIFTY 50">
+            🇮🇳 Nifty 50
+          </button>
+
+          <!-- US Equities -->
+          <button class="quick-chip px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 text-slate-300 hover:text-white transition" data-ticker="Apple">
+            🇺🇸 Apple
+          </button>
+          <button class="quick-chip px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 text-slate-300 hover:text-white transition" data-ticker="NVDA">
+            🇺🇸 Nvidia
+          </button>
+          <button class="quick-chip px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 text-slate-300 hover:text-white transition" data-ticker="Tesla">
+            🇺🇸 Tesla
+          </button>
+          <button class="quick-chip px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 text-slate-300 hover:text-white transition" data-ticker="Microsoft">
+            🇺🇸 Microsoft
+          </button>
+          <button class="quick-chip px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 text-slate-300 hover:text-white transition" data-ticker="S&P 500">
+            🇺🇸 S&P 500
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Error Banner -->
+    <div id="errorBanner" class="hidden bg-rose-500/10 border border-rose-500/30 rounded-2xl p-4 text-rose-300 flex items-start gap-3">
+      <i class="fa-solid fa-circle-exclamation text-xl text-rose-400 mt-0.5"></i>
+      <div id="errorMessage" class="text-sm"></div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="hidden space-y-6 py-12 text-center">
+      <div class="inline-block relative">
+        <div class="w-16 h-16 rounded-full border-4 border-slate-800 border-t-emerald-400 animate-spin"></div>
+        <div class="absolute inset-0 flex items-center justify-center text-emerald-400 font-bold text-xs">AI</div>
+      </div>
+      <div class="space-y-2">
+        <h3 id="loadingText" class="text-lg font-semibold text-slate-200">Analyzing Market Data...</h3>
+        <p class="text-xs text-slate-400 max-w-md mx-auto">Computing 18 stationary technical indicators, cross-market historical pricing, and training Random Forest & Gradient Boosting ensemble models.</p>
+      </div>
+    </div>
+
+    <!-- Results Section -->
+    <div id="resultsSection" class="space-y-8">
+
+      <!-- Hero Row: Core Prediction & Signals -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Card 1: Asset & Predicted Target -->
+        <div class="lg:col-span-2 bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden backdrop-blur-xl">
+          <div class="absolute -right-16 -top-16 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none"></div>
+          
+          <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span id="tickerBadge" class="px-2.5 py-1 text-xs font-mono font-bold rounded-lg bg-slate-800 text-slate-300 border border-slate-700">RELIANCE.NS</span>
+                <span id="currencyBadge" class="px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-800/80 text-emerald-400 border border-slate-700">INR (₹)</span>
+                <span id="sectorBadge" class="px-2.5 py-1 text-xs rounded-lg bg-slate-800/50 text-slate-400">Energy</span>
+              </div>
+              <h2 id="companyName" class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">Reliance Industries Limited</h2>
+            </div>
+            
+            <!-- Signal Badge -->
+            <div id="signalBadge" class="px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 shadow-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span id="signalText">MODERATE BUY 🟢</span>
+            </div>
+          </div>
+
+          <!-- Price Comparison Display -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 p-4 rounded-xl bg-slate-950/60 border border-slate-800/80">
+            <div>
+              <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Current Market Close</p>
+              <div class="text-3xl font-extrabold font-mono text-slate-200" id="currentPrice">₹1,377.50</div>
+              <p class="text-xs text-slate-500 mt-1">Latest confirmed trading session</p>
+            </div>
+
+            <div class="border-t sm:border-t-0 sm:border-l border-slate-800 pt-4 sm:pt-0 sm:pl-6">
+              <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Expected Next Session Close</p>
+              <div class="flex items-baseline gap-3">
+                <div class="text-3xl font-extrabold font-mono text-emerald-400" id="predictedPrice">₹1,378.22</div>
+                <div id="returnPill" class="px-2.5 py-1 rounded-lg text-xs font-bold font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                  <i class="fa-solid fa-arrow-trend-up"></i>
+                  <span id="returnText">+0.05%</span>
+                </div>
+              </div>
+              <p class="text-xs text-slate-500 mt-1">Derived from stationary ensemble return</p>
+            </div>
+          </div>
+
+          <!-- 95% Confidence Corridor Visualizer -->
+          <div class="mt-6 space-y-2">
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-slate-400 font-medium flex items-center gap-1">
+                <i class="fa-solid fa-shield-halved text-cyan-400"></i> 95% Confidence Trading Corridor:
+              </span>
+              <span class="text-slate-300 font-mono text-xs">
+                <span id="rangeLowerText">₹1,314.81</span> ──► <span id="rangeUpperText">₹1,441.62</span>
+              </span>
+            </div>
+
+            <!-- Corridor Range Bar -->
+            <div class="relative h-3 bg-slate-800 rounded-full overflow-hidden p-0.5">
+              <div class="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-500/40 via-emerald-500/50 to-cyan-500/40 rounded-full w-full"></div>
+            </div>
+            <div class="flex justify-between text-[11px] text-slate-500">
+              <span>95% Downside Floor (1.96× ATR)</span>
+              <span>Point Estimate</span>
+              <span>95% Upside Ceiling (1.96× ATR)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Quantitative Edge & Model Reliability -->
+        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between backdrop-blur-xl">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wider">Model Validation</h3>
+              <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-slate-800 text-slate-400 border border-slate-700">Out-of-Sample</span>
+            </div>
+
+            <div class="space-y-4">
+              <!-- Directional Hit Rate -->
+              <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800/80">
+                <div class="flex justify-between items-center text-xs mb-1">
+                  <span class="text-slate-400">Directional Hit Rate (Win %)</span>
+                  <span id="hitRateText" class="font-bold font-mono text-emerald-400 text-sm">54.1%</span>
+                </div>
+                <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                  <div id="hitRateBar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full" style="width: 54.1%"></div>
+                </div>
+                <p class="text-[11px] text-slate-500 mt-1">Accuracy in calling UP vs DOWN sessions</p>
+              </div>
+
+              <!-- MAPE Price Error -->
+              <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800/80">
+                <div class="flex justify-between items-center text-xs mb-1">
+                  <span class="text-slate-400">Mean Absolute % Error (MAPE)</span>
+                  <span id="mapeText" class="font-bold font-mono text-cyan-400 text-sm">1.04%</span>
+                </div>
+                <p class="text-[11px] text-slate-500">Average historical price variance on test split</p>
+              </div>
+
+              <!-- Volatility & ATR -->
+              <div class="grid grid-cols-2 gap-2">
+                <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80">
+                  <span class="text-[11px] text-slate-400 block">Annual Volatility</span>
+                  <span id="volatilityText" class="font-bold font-mono text-amber-400 text-sm">43.1%</span>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80">
+                  <span class="text-[11px] text-slate-400 block">Daily ATR</span>
+                  <span id="atrText" class="font-bold font-mono text-slate-200 text-sm">₹32.35</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-800 text-[11px] text-slate-500">
+            Ensemble: <b class="text-slate-400">RandomForest</b> (150 trees) + <b class="text-slate-400">GradientBoosting</b> (100 trees).
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive Chart Section -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-xl space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h3 class="text-lg font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-chart-area text-emerald-400"></i>
+              Interactive Price & Prediction Chart
+            </h3>
+            <p class="text-xs text-slate-400">90-Day Historical Trend with 20-Day & 50-Day SMAs and Next-Session Forecast</p>
+          </div>
+
+          <!-- Chart Legend Pills -->
+          <div class="flex items-center gap-3 text-xs">
+            <span class="flex items-center gap-1.5 text-slate-300">
+              <span class="w-3 h-0.5 bg-emerald-400 inline-block"></span> Close Price
+            </span>
+            <span class="flex items-center gap-1.5 text-slate-300">
+              <span class="w-3 h-0.5 bg-amber-400 inline-block"></span> SMA 20
+            </span>
+            <span class="flex items-center gap-1.5 text-slate-300">
+              <span class="w-3 h-0.5 bg-purple-400 inline-block"></span> SMA 50
+            </span>
+            <span class="flex items-center gap-1.5 text-slate-300">
+              <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 inline-block animate-ping"></span> Forecast Target
+            </span>
+          </div>
+        </div>
+
+        <!-- Canvas Container -->
+        <div class="relative w-full h-[360px] sm:h-[420px]">
+          <canvas id="priceChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Technical Indicators Deep Dive Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- RSI Card -->
+        <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 backdrop-blur-xl space-y-2">
+          <div class="flex justify-between items-center text-xs text-slate-400 font-semibold uppercase">
+            <span>RSI (14-Day)</span>
+            <i class="fa-solid fa-gauge-high text-slate-500"></i>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <div id="rsiValue" class="text-2xl font-black font-mono text-slate-100">54.2</div>
+            <span id="rsiStatus" class="text-xs font-semibold px-2 py-0.5 rounded bg-slate-800 text-slate-300">Neutral</span>
+          </div>
+          <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden flex">
+            <div class="bg-emerald-500/50 w-[30%]"></div>
+            <div class="bg-slate-600/50 w-[40%]"></div>
+            <div class="bg-rose-500/50 w-[30%]"></div>
+          </div>
+          <div class="flex justify-between text-[10px] text-slate-500">
+            <span>Oversold &lt;30</span>
+            <span>Overbought &gt;70</span>
+          </div>
+        </div>
+
+        <!-- Key Support S1 -->
+        <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 backdrop-blur-xl space-y-2">
+          <div class="flex justify-between items-center text-xs text-slate-400 font-semibold uppercase">
+            <span>Key Support (S1)</span>
+            <i class="fa-solid fa-layer-group text-slate-500"></i>
+          </div>
+          <div id="supportS1" class="text-2xl font-black font-mono text-emerald-400">₹1,225.67</div>
+          <p class="text-xs text-slate-500">20-Day Low: <span id="swingLow20d" class="font-mono text-slate-400">₹1,152.50</span></p>
+        </div>
+
+        <!-- Key Resistance R1 -->
+        <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 backdrop-blur-xl space-y-2">
+          <div class="flex justify-between items-center text-xs text-slate-400 font-semibold uppercase">
+            <span>Key Resistance (R1)</span>
+            <i class="fa-solid fa-cubes-stacked text-slate-500"></i>
+          </div>
+          <div id="resistanceR1" class="text-2xl font-black font-mono text-rose-400">₹1,456.17</div>
+          <p class="text-xs text-slate-500">20-Day High: <span id="swingHigh20d" class="font-mono text-slate-400">₹1,383.00</span></p>
+        </div>
+
+        <!-- Risk-to-Reward Ratio -->
+        <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 backdrop-blur-xl space-y-2">
+          <div class="flex justify-between items-center text-xs text-slate-400 font-semibold uppercase">
+            <span>Stationary Modeling</span>
+            <i class="fa-solid fa-wave-square text-slate-500"></i>
+          </div>
+          <div class="text-lg font-bold text-slate-200">Return-Based</div>
+          <p class="text-xs text-slate-400">Eliminates non-stationary autoregressive persistence traps.</p>
+        </div>
+      </div>
+
+      <!-- AI Conversational Analyst Drawer -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-xl space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
+              <i class="fa-solid fa-robot"></i>
+            </div>
+            <div>
+              <h3 class="text-sm font-bold text-white">AI Financial Analyst Assistant</h3>
+              <p class="text-xs text-slate-400">Ask questions regarding this forecast, stop-loss levels, or market signals.</p>
+            </div>
+          </div>
+          <span class="text-[11px] text-slate-500">Powered by Gemini / Quant Core</span>
+        </div>
+
+        <!-- Chat History Window -->
+        <div id="chatHistory" class="space-y-3 max-h-64 overflow-y-auto pr-2 text-sm">
+          <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3 text-slate-300">
+            <span class="text-emerald-400 font-bold text-xs block mb-1">AI Analyst:</span>
+            Hello! I have generated the quantitative analysis for this asset. Ask me questions like <i>"What is the recommended stop loss?"</i>, <i>"Why is the signal bullish?"</i>, or <i>"Explain the 95% confidence corridor"</i>.
+          </div>
+        </div>
+
+        <!-- Quick Question Suggestions -->
+        <div class="flex flex-wrap items-center gap-2 text-xs">
+          <button class="chat-prompt-btn px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
+            What is my recommended Stop-Loss?
+          </button>
+          <button class="chat-prompt-btn px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
+            Explain the 95% Confidence Corridor
+          </button>
+          <button class="chat-prompt-btn px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
+            Why is this signal given?
+          </button>
+          <button class="chat-prompt-btn px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
+            Can this predict 100% accurately?
+          </button>
+        </div>
+
+        <!-- Chat Input Form -->
+        <form id="chatForm" class="flex gap-2">
+          <input 
+            type="text" 
+            id="chatInput" 
+            placeholder="Ask the AI Analyst about this forecast..." 
+            class="flex-1 bg-slate-950/80 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+          >
+          <button 
+            type="submit" 
+            class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-sm transition active:scale-95 cursor-pointer"
+          >
+            Send
+          </button>
+        </form>
+      </div>
+
+    </div>
+
+    <!-- Educational & Mathematical Reality Footer Banner -->
+    <footer class="mt-12 p-6 rounded-2xl bg-slate-900/50 border border-slate-800/80 text-xs text-slate-400 space-y-2">
+      <div class="flex items-center gap-2 text-amber-400 font-bold text-sm">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>Mathematical Reality & Risk Disclosure</span>
+      </div>
+      <p class="leading-relaxed">
+        Under the <b>Efficient Market Hypothesis</b> and <b>Random Walk Theory</b>, future stock price movements are stochastic processes influenced by unforeseen catalysts (earnings surprises, central bank policy shifts, geopolitical headlines, and order flow). No algorithm can achieve 100% certainty. Quantitative trading systems focus on statistical expected value, out-of-sample directional edges (55%–65% win rates), and strict asymmetric risk management.
+      </p>
+      <p class="text-slate-500 text-[11px] pt-1 border-t border-slate-800/60">
+        QuantPulse AI is an algorithmic research and educational platform. It does not provide financial or trading advice.
+      </p>
+    </footer>
+
+  </main>
+
+  <!-- App Script -->
+  <script src="/static/app.js"></script>
+</body>
+</html>

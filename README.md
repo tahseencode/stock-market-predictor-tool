@@ -1,6 +1,17 @@
-# 📈 Advanced Quantitative Stock Predictor AI (US & Indian Markets)
+# 📈 QuantPulse AI - Quantitative Stock Predictor (US & Indian Markets)
 
-A production-grade quantitative stock prediction and analysis tool powered by **Ensemble Machine Learning** (`RandomForestRegressor` + `GradientBoostingRegressor`) and stationary technical indicators. It provides seamless native support for both **US Markets (NYSE, NASDAQ, S&P 500)** and **Indian Markets (NSE, BSE, NIFTY 50, SENSEX)**.
+A production-grade quantitative stock prediction and analysis tool powered by **Ensemble Machine Learning** (`RandomForestRegressor` + `GradientBoostingRegressor`) and stationary technical indicators. Features a **modern interactive Web Dashboard (FastAPI + Chart.js)** with seamless native support for both **US Markets (NYSE, NASDAQ, S&P 500)** and **Indian Markets (NSE, BSE, NIFTY 50, SENSEX)**.
+
+---
+
+## 🖥️ Modern Web Frontend Dashboard
+
+The tool includes a sleek, dark-mode institutional trading web application:
+- **Interactive Multi-Market Search**: Auto-complete and auto-detection for Indian and US tickers.
+- **Dynamic Charting (Chart.js)**: 90-day historical prices, 20-day SMA, 50-day SMA, and next-session predicted targets with forecast cones.
+- **Visual Confidence Corridor**: Live 95% probability corridor based on $1.96 \times \text{ATR}$.
+- **Technical Indicator Gauges**: RSI (14-day) with overbought/oversold meters, Volatility %, ATR, and Support/Resistance (S1, R1, 20-day extremes).
+- **Embedded AI Financial Analyst**: Integrated chat drawer powered by Google Gemini (or local quantitative analyst) to ask questions, explain forecasts, and compute dynamic stop-loss levels.
 
 ---
 
@@ -17,57 +28,36 @@ A production-grade quantitative stock prediction and analysis tool powered by **
 
 ---
 
-## ✨ Features
-
-- 🇮🇳 🇺🇸 **Dual-Market Intelligence**:
-  - Automatically identifies whether an asset is listed on US exchanges (NYSE / NASDAQ) or Indian exchanges (NSE / BSE).
-  - Dynamic currency formatting: Indian stocks display in **INR (₹)**; US stocks display in **USD ($)**.
-  - Built-in aliases for top Indian equities (`Reliance`, `TCS`, `HDFC Bank`, `Infosys`, `Tata Motors`, `SBI`, etc.) and Indian indices (`Nifty 50`, `Bank Nifty`, `Sensex`), alongside US giants (`Apple`, `Tesla`, `Nvidia`, `Microsoft`, `S&P 500`).
-- 🔬 **Stationary Quantitative Feature Engineering**:
-  - Solves the classic non-stationary random-walk trap by predicting **next-day percentage return** ($\Delta y$) rather than raw lagging price.
-  - Multi-factor technical indicators:
-    - **Momentum**: 1-day, 3-day, 5-day, 10-day returns.
-    - **Trend**: Distance ratios to 10, 20, 50, and 200-day Moving Averages.
-    - **RSI (14-day)**: Relative Strength Index for overbought / oversold detection.
-    - **MACD**: MACD line, signal line, and normalized histogram.
-    - **Bollinger Bands**: %B position and bandwidth.
-    - **Volatility & ATR**: 14-day Average True Range and 20-day annualized rolling volatility.
-    - **Volume Dynamics**: Volume-to-20-day MA ratio.
-- 🤖 **Ensemble Machine Learning Architecture**:
-  - Blends `RandomForestRegressor` and `GradientBoostingRegressor`.
-  - Evaluates on a strict chronological **time-series split** (last 20% out-of-sample).
-- 📊 **Comprehensive Actionable Output**:
-  - **Expected Next Close Price**: Most probable point estimate based on predicted return.
-  - **95% Confidence Corridor**: Upper and lower trading boundary calculated via $1.96 \times \text{ATR}$.
-  - **Directional Hit Rate (Win Rate %)**: Out-of-sample percentage of times the model correctly called the direction (UP vs DOWN).
-  - **Mean Absolute Percentage Error (MAPE %)**: Actual price forecasting error margin.
-  - **Key Support & Resistance Levels**: Quantitative pivot points, S1, R1, 20-day swing highs and lows.
-  - **Overall Signal**: Strong Buy 🟢, Moderate Buy 🟢, Neutral 🟡, Moderate Sell 🔴, Strong Sell 🔴.
-- 💬 **Conversational AI & CLI Modes**:
-  - **One-Shot CLI**: Run direct stock analysis from the terminal without interactive prompts.
-  - **Interactive Chatbot**: Converse with the bot and ask questions.
-  - **Gemini Integration**: Supports Google Gemini (`google.genai` SDK or `google.generativeai`) to explain predictions conversationally, or runs seamlessly offline using the built-in quantitative analytics engine.
-
----
-
 ## 🛠️ Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/<your-username>/<your-repo>.git
+git clone https://github.com/tahseencode/stock-market-predictor-tool.git
 cd stock-market-predictor-tool
 
 # Install dependencies
-pip install yfinance pandas numpy scikit-learn requests google-genai
+pip install -r requirements.txt
 ```
 
 ---
 
 ## 🚀 How to Run
 
-### 1. Direct CLI Analysis (Instant Output)
+### 1. Launch the Web Frontend Dashboard (Recommended)
 
-Analyze any Indian or US stock instantly:
+Start the local web server:
+
+```bash
+python app.py
+```
+
+Then open your browser at **[http://localhost:8000](http://localhost:8000)**.
+
+---
+
+### 2. Direct CLI Analysis (Instant Output)
+
+Analyze any Indian or US stock directly from your terminal:
 
 ```bash
 # Indian Stocks (auto-appends .NS and uses ₹ INR)
@@ -84,7 +74,9 @@ python ai.py --ticker "NVDA"
 python ai.py --ticker "S&P 500"
 ```
 
-### 2. Interactive Chatbot Mode
+---
+
+### 3. Interactive Terminal Chatbot Mode
 
 ```bash
 python ai.py
@@ -117,7 +109,7 @@ Market / Curr: INR (₹)
 • Daily True Range (ATR):  ₹32.35
 • Key Support (S1):        ₹1,225.67 (20D Low: ₹1,152.50)
 • Key Resistance (R1):     ₹1,456.17 (20D High: ₹1,383.00)
-...
+======================================================================
 ```
 
 ---
@@ -126,9 +118,14 @@ Market / Curr: INR (₹)
 
 ```text
 stock-market-predictor-tool/
-├── ai.py           # Core quantitative engine, ticker resolver, ML ensemble & chatbot
-├── README.md       # Comprehensive documentation & mathematical disclosure
-└── requirements.txt
+├── app.py              # FastAPI server & REST API endpoints (/api/predict, /api/chat)
+├── ai.py               # Core quantitative engine, ticker resolver, ML ensemble & chatbot
+├── requirements.txt    # Python dependencies
+├── README.md           # Documentation & mathematical disclosure
+└── static/
+    ├── index.html      # Responsive single-page web dashboard
+    ├── style.css       # Dark-mode institutional trading UI theme
+    └── app.js          # Chart.js integration, search autocomplete & chat drawer
 ```
 
 ---

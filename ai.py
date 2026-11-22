@@ -396,6 +396,36 @@ def predict_stock(ticker: str) -> Optional[Dict[str, Any]]:
         r1 = (2.0 * pivot) - recent_low
         s1 = (2.0 * pivot) - recent_high
         
+        # Chart Data for Frontend (last 90 trading days)
+        chart_slice = df.iloc[-90:].copy()
+        dates_list = [d.strftime('%Y-%m-%d') if hasattr(d, 'strftime') else str(d)[:10] for d in chart_slice.index]
+        close_list = [round(float(p), 2) for p in chart_slice['Close']]
+        sma20_series = df['Close'].rolling(20).mean().iloc[-90:]
+        sma50_series = df['Close'].rolling(50).mean().iloc[-90:]
+        sma20_list = [round(float(p), 2) if not np.isnan(p) else None for p in sma20_series]
+        sma50_list = [round(float(p), 2) if not np.isnan(p) else None for p in sma50_series]
+        volume_list = [int(v) if not np.isnan(v) else 0 for v in chart_slice['Volume']]
+        
+        # Next projected date (1 business day after last date)
+        try:
+            last_dt = chart_slice.index[-1]
+            next_dt = last_dt + pd.tseries.offsets.BDay(1)
+            next_date_str = next_dt.strftime('%Y-%m-%d')
+        except Exception:
+            next_date_str = "Next Session"
+            
+        chart_data = {
+            'dates': dates_list,
+            'prices': close_list,
+            'sma20': sma20_list,
+            'sma50': sma50_list,
+            'volume': volume_list,
+            'next_date': next_date_str,
+            'predicted_price': round(predicted_close, 2),
+            'range_lower': round(range_lower, 2),
+            'range_upper': round(range_upper, 2)
+        }
+        
         # Qualitative Signal Analysis
         bullish_score = 0
         if pred_return > 0.001:
@@ -450,7 +480,8 @@ def predict_stock(ticker: str) -> Optional[Dict[str, Any]]:
             'support_s1': s1,
             'resistance_r1': r1,
             'swing_high_20d': recent_high,
-            'swing_low_20d': recent_low
+            'swing_low_20d': recent_low,
+            'chart_data': chart_data
         }
         
     except Exception as e:
