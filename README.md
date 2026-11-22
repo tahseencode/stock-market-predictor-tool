@@ -1,191 +1,138 @@
-# 📈 Stock Prediction AI Chatbot
+# 📈 Advanced Quantitative Stock Predictor AI (US & Indian Markets)
 
-A command-line chatbot that predicts the **next closing price** of a stock using a Random Forest model trained on 5 years of historical data from Yahoo Finance. Optionally, it uses **Google Gemini** to explain predictions in a friendly, conversational way.
+A production-grade quantitative stock prediction and analysis tool powered by **Ensemble Machine Learning** (`RandomForestRegressor` + `GradientBoostingRegressor`) and stationary technical indicators. It provides seamless native support for both **US Markets (NYSE, NASDAQ, S&P 500)** and **Indian Markets (NSE, BSE, NIFTY 50, SENSEX)**.
 
-> ⚠️ **Disclaimer:** This project is for learning and experimentation only. It is **not** financial advice. Do not make real investment decisions based on its output.
+---
+
+## ⚠️ Important Mathematical & Market Reality
+
+> **Can any algorithm guarantee 100% price prediction accuracy?**
+>
+> **No.** In financial mathematics and economic theory (the *Efficient Market Hypothesis* and *Random Walk Theory*), stock price movements are stochastic processes influenced by unpredictable future events: unexpected earnings results, central bank interest rate decisions (RBI / US Federal Reserve), geopolitical shifts, macroeconomic shocks, and human sentiment.
+>
+> Any model that claims "100% accuracy" is either suffering from severe data leakage (e.g. predicting $P_t$ as $P_{t+1}$ on non-stationary price data) or overfitting historical noise.
+>
+> **What professional quantitative systems actually do:**
+> - Rather than making single dogmatic guesses, institutional quantitative algorithms focus on **statistical edge** (55%–65% directional win rates), **expected price value**, **95% confidence corridors (trading ranges)**, and **asymmetric risk-to-reward ratios**.
 
 ---
 
 ## ✨ Features
 
-- 🔍 **Company name → ticker lookup**: type "Apple" or "Tesla" instead of `AAPL` / `TSLA` (uses Yahoo Finance search).
-- 🤖 **ML prediction**: `RandomForestRegressor` trained on 5 years of daily closing prices.
-- 📊 **Model score**: reports R² on a held-out test set (time-ordered split, no shuffling).
-- 🏢 **Company context**: shows company name, sector, industry, and current price.
-- 💬 **Two modes**
-  - **Gemini mode**: human-like conversation powered by Google Gemini (free API key).
-  - **Basic mode**: rule-based replies, no API key required.
+- 🇮🇳 🇺🇸 **Dual-Market Intelligence**:
+  - Automatically identifies whether an asset is listed on US exchanges (NYSE / NASDAQ) or Indian exchanges (NSE / BSE).
+  - Dynamic currency formatting: Indian stocks display in **INR (₹)**; US stocks display in **USD ($)**.
+  - Built-in aliases for top Indian equities (`Reliance`, `TCS`, `HDFC Bank`, `Infosys`, `Tata Motors`, `SBI`, etc.) and Indian indices (`Nifty 50`, `Bank Nifty`, `Sensex`), alongside US giants (`Apple`, `Tesla`, `Nvidia`, `Microsoft`, `S&P 500`).
+- 🔬 **Stationary Quantitative Feature Engineering**:
+  - Solves the classic non-stationary random-walk trap by predicting **next-day percentage return** ($\Delta y$) rather than raw lagging price.
+  - Multi-factor technical indicators:
+    - **Momentum**: 1-day, 3-day, 5-day, 10-day returns.
+    - **Trend**: Distance ratios to 10, 20, 50, and 200-day Moving Averages.
+    - **RSI (14-day)**: Relative Strength Index for overbought / oversold detection.
+    - **MACD**: MACD line, signal line, and normalized histogram.
+    - **Bollinger Bands**: %B position and bandwidth.
+    - **Volatility & ATR**: 14-day Average True Range and 20-day annualized rolling volatility.
+    - **Volume Dynamics**: Volume-to-20-day MA ratio.
+- 🤖 **Ensemble Machine Learning Architecture**:
+  - Blends `RandomForestRegressor` and `GradientBoostingRegressor`.
+  - Evaluates on a strict chronological **time-series split** (last 20% out-of-sample).
+- 📊 **Comprehensive Actionable Output**:
+  - **Expected Next Close Price**: Most probable point estimate based on predicted return.
+  - **95% Confidence Corridor**: Upper and lower trading boundary calculated via $1.96 \times \text{ATR}$.
+  - **Directional Hit Rate (Win Rate %)**: Out-of-sample percentage of times the model correctly called the direction (UP vs DOWN).
+  - **Mean Absolute Percentage Error (MAPE %)**: Actual price forecasting error margin.
+  - **Key Support & Resistance Levels**: Quantitative pivot points, S1, R1, 20-day swing highs and lows.
+  - **Overall Signal**: Strong Buy 🟢, Moderate Buy 🟢, Neutral 🟡, Moderate Sell 🔴, Strong Sell 🔴.
+- 💬 **Conversational AI & CLI Modes**:
+  - **One-Shot CLI**: Run direct stock analysis from the terminal without interactive prompts.
+  - **Interactive Chatbot**: Converse with the bot and ask questions.
+  - **Gemini Integration**: Supports Google Gemini (`google.genai` SDK or `google.generativeai`) to explain predictions conversationally, or runs seamlessly offline using the built-in quantitative analytics engine.
 
 ---
 
-## 🧠 How It Works
-
-1. **Input parsing**: a regex extracts the company name from messages like *"predict Apple"* or *"price of Tesla"*.
-2. **Ticker resolution**: `get_valid_ticker()` queries Yahoo Finance search and verifies the symbol returns data. Falls back to a cleaned-up version of the input.
-3. **Data download**: `yfinance` fetches 5 years of daily OHLCV data.
-4. **Feature engineering**: the previous day's close (`Prev_Close`) is the single feature; the current close is the target.
-5. **Training**: 80/20 chronological train/test split, then `RandomForestRegressor(n_estimators=100)`.
-6. **Prediction**: the latest close is fed into the model to predict the next close.
-7. **Response**: results are either passed to Gemini to narrate, or printed by the basic fallback.
-
----
-
-## 🛠️ Tech Stack
-
-| Purpose | Library |
-|---|---|
-| Market data | `yfinance` |
-| Data handling | `pandas` |
-| Machine learning | `scikit-learn` |
-| HTTP requests | `requests` |
-| Conversational AI (optional) | `google-generativeai` |
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Python 3.9+
-- (Optional) A free Gemini API key from [Google AI Studio](https://aistudio.google.com/app/apikey)
-
-### Installation
+## 🛠️ Installation
 
 ```bash
-# 1. Clone the repository
+# Clone the repository
 git clone https://github.com/<your-username>/<your-repo>.git
-cd <your-repo>
+cd stock-market-predictor-tool
 
-# 2. (Recommended) Create a virtual environment
-python -m venv venv
-source venv/bin/activate        # macOS / Linux
-venv\Scripts\activate           # Windows
-
-# 3. Install dependencies
-pip install yfinance pandas scikit-learn requests
-
-# 4. (Optional) Install Gemini support
-pip install google-generativeai
+# Install dependencies
+pip install yfinance pandas numpy scikit-learn requests google-genai
 ```
 
-Or use a `requirements.txt`:
+---
 
-```text
-yfinance
-pandas
-scikit-learn
-requests
-google-generativeai
-```
+## 🚀 How to Run
+
+### 1. Direct CLI Analysis (Instant Output)
+
+Analyze any Indian or US stock instantly:
 
 ```bash
-pip install -r requirements.txt
+# Indian Stocks (auto-appends .NS and uses ₹ INR)
+python ai.py --ticker "Reliance"
+python ai.py --ticker "TCS"
+python ai.py --ticker "Tata Motors"
+python ai.py --ticker "HDFCBANK.NS"
+python ai.py --ticker "NIFTY 50"
+
+# US Stocks (uses $ USD)
+python ai.py --ticker "Apple"
+python ai.py --ticker "Tesla"
+python ai.py --ticker "NVDA"
+python ai.py --ticker "S&P 500"
 ```
 
-### Configure Gemini (optional)
-
-Set your key as an environment variable:
+### 2. Interactive Chatbot Mode
 
 ```bash
-export GEMINI_API_KEY="your_api_key_here"      # macOS / Linux
-set GEMINI_API_KEY=your_api_key_here           # Windows (cmd)
-$env:GEMINI_API_KEY="your_api_key_here"        # Windows (PowerShell)
+python ai.py
 ```
 
-Or just paste it when the program asks. Press **Enter** to skip and use the basic version.
+Example interactions:
+```text
+You: predict Reliance
+AI: Analyzing 'Reliance' across Indian and US exchanges...
+Found symbol: RELIANCE.NS. Training quantitative ensemble on historical market data...
 
-### Run
+======================================================================
+📊 QUANTITATIVE PREDICTION & ANALYSIS REPORT
+======================================================================
+Company:       Reliance Industries Limited (RELIANCE.NS)
+Sector / Ind:  Energy | Oil & Gas Refining & Marketing
+Market / Curr: INR (₹)
 
-```bash
-python main.py
+💵 Current Price:           ₹1,377.50
+🎯 Expected Next Close:     ₹1,378.22 (▲ +0.05%)
+🚦 Overall Signal:          MODERATE BUY / SLIGHTLY BULLISH 🟢
+
+🛡️ 95% Confidence Range:   ₹1,314.81  ───►  ₹1,441.62
+📈 Directional Hit Rate:    54.1% (Out-of-sample Win Rate)
+📉 Model Price Error (MAPE): 1.04%
+
+[ TECHNICAL CONTEXT ]
+• RSI (14-day):            98.2 (Overbought)
+• Volatility (Annualized): 43.1%
+• Daily True Range (ATR):  ₹32.35
+• Key Support (S1):        ₹1,225.67 (20D Low: ₹1,152.50)
+• Key Resistance (R1):     ₹1,456.17 (20D High: ₹1,383.00)
+...
 ```
-
-*(Replace `main.py` with your script's filename.)*
 
 ---
 
-## 💬 Example Usage
+## ⚙️ Project Architecture
 
 ```text
-AI: Hello! I am your Stock Prediction AI. You can ask me to predict a stock's price, or just say hi.
-
-You: predict Apple
-AI: Let me look into 'apple' for you...
-Searching for symbol for: apple...
-Found symbol: AAPL
-AI: Based on my Random Forest model, the predicted next closing price is $xxx.xx with xx.xx% accuracy.
-
-You: what is your accuracy?
-AI: On my last prediction for AAPL, my model achieved an accuracy score of xx.xx%...
-
-You: bye
-AI: Goodbye! Happy trading!
+stock-market-predictor-tool/
+├── ai.py           # Core quantitative engine, ticker resolver, ML ensemble & chatbot
+├── README.md       # Comprehensive documentation & mathematical disclosure
+└── requirements.txt
 ```
 
-### Things you can say
-
-- `predict Apple`
-- `what is the price of Tesla?`
-- `forecast Microsoft stock`
-- `what is your accuracy?`
-- `quit` / `exit` / `bye`
-
 ---
 
-## 📁 Project Structure
+## 🛡️ Disclaimer
 
-```text
-.
-├── main.py          # Chatbot, ticker search, and prediction logic
-├── requirements.txt # Python dependencies
-└── README.md
-```
-
-### Key functions
-
-| Function | Description |
-|---|---|
-| `get_valid_ticker(ticker)` | Searches Yahoo Finance for a symbol and validates it |
-| `predict_stock(ticker)` | Downloads data, trains the model, returns prediction + metadata |
-| `chat()` | Main interactive loop (Gemini mode and basic mode) |
-
----
-
-## ⚠️ Limitations
-
-Being upfront about what this model can and can't do:
-
-- **Single feature**: the model only sees yesterday's close, so it learns little beyond "tomorrow ≈ today". No volume, indicators, news, or market context.
-- **"Accuracy" is R², not prediction accuracy**: because prices are highly autocorrelated, R² can look high even for a trivial model. It does **not** mean the prediction is right X% of the time.
-- **Random Forests can't extrapolate**: if a stock trades above its historical price range, predictions are capped near the highest prices seen in training.
-- **Markets are noisy**: no model based on price history alone reliably predicts the market.
-- **Name matching is heuristic**: the regex and Yahoo search may pick the wrong ticker for ambiguous names.
-- **Library changes**: recent `yfinance` versions can return multi-level columns, and `google-generativeai` and the `gemini-1.5-flash` model are being phased out. You may need to update them.
-
----
-
-## 🔮 Ideas for Improvement
-
-- Add technical indicators (moving averages, RSI, MACD) and volume as features
-- Predict **returns** (percent change) instead of raw price
-- Try time-series models (ARIMA, LSTM, XGBoost) and compare against a naive baseline
-- Use walk-forward validation, and report MAE/RMSE and directional accuracy
-- Add price charts (matplotlib / plotly)
-- Build a web UI with Streamlit or Flask
-- Migrate to the newer `google-genai` SDK and a current Gemini model
-
----
-
-## 🤝 Contributing
-
-Pull requests are welcome. For major changes, please open an issue first to discuss what you'd like to change.
-
-## 📄 License
-
-Distributed under the MIT License. See `LICENSE` for details.
-
-## 🙏 Acknowledgements
-
-- [yfinance](https://github.com/ranaroussi/yfinance) for market data
-- [scikit-learn](https://scikit-learn.org/) for machine learning
-- [Google Gemini](https://ai.google.dev/) for conversational responses
+This tool is created for educational, research, and algorithmic analysis purposes only. It does not constitute personal financial, investment, or trading advice. Always conduct your own due diligence and apply strict capital risk management.
