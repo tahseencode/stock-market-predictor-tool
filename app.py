@@ -75,16 +75,20 @@ def search_suggestions(q: str = Query(..., min_length=1)):
     """Provides autocomplete search suggestions for Indian and US stocks."""
     query = q.lower().strip()
     matches = []
+    seen_symbols = set()
     
     # Match aliases
     for name, sym in POPULAR_ALIASES.items():
+        if sym in seen_symbols:
+            continue
         if query in name or query in sym.lower():
-            market = "India (NSE)" if ".NS" in sym or ".BO" in sym or "NSE" in sym or "BSE" in sym else "US (NYSE/NASDAQ)"
+            market = "India (NSE)" if (".NS" in sym or ".BO" in sym or "NSE" in sym or "BSE" in sym) else "US (NYSE/NASDAQ)"
             matches.append({
                 "name": name.title(),
                 "symbol": sym,
                 "market": market
             })
+            seen_symbols.add(sym)
             if len(matches) >= 8:
                 break
                 

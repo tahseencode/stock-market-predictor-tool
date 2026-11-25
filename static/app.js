@@ -100,8 +100,10 @@ function setupEventListeners() {
   document.querySelectorAll(".quick-chip").forEach((chip) => {
     chip.addEventListener("click", () => {
       const ticker = chip.getAttribute("data-ticker");
+      const market = chip.getAttribute("data-market") || marketFilter.value;
+      if (market) marketFilter.value = market;
       tickerInput.value = ticker;
-      analyzeStock(ticker);
+      analyzeStock(ticker, market);
     });
   });
 
@@ -174,8 +176,10 @@ function renderSuggestions(list) {
     `;
     div.addEventListener("click", () => {
       tickerInput.value = item.name;
+      const mkt = item.market && item.market.includes("India") ? "in" : "us";
+      marketFilter.value = mkt;
       hideSuggestions();
-      analyzeStock(item.symbol);
+      analyzeStock(item.symbol, mkt);
     });
     suggestionsDropdown.appendChild(div);
   });

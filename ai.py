@@ -34,10 +34,14 @@ POPULAR_ALIASES = {
     "nifty": "^NSEI",
     "nifty 50": "^NSEI",
     "nifty50": "^NSEI",
+    "^nsei": "^NSEI",
     "bank nifty": "^NSEBANK",
     "banknifty": "^NSEBANK",
+    "^nsebank": "^NSEBANK",
     "sensex": "^BSESN",
     "bse sensex": "^BSESN",
+    "^bsesn": "^BSESN",
+    "midcap nifty": "^NSEMDCP50",
     
     # Top Indian Equities (NSE)
     "reliance": "RELIANCE.NS",
@@ -47,66 +51,177 @@ POPULAR_ALIASES = {
     "tata consultancy services": "TCS.NS",
     "hdfc": "HDFCBANK.NS",
     "hdfc bank": "HDFCBANK.NS",
+    "hdfcbank": "HDFCBANK.NS",
     "infosys": "INFY.NS",
     "infy": "INFY.NS",
     "icici": "ICICIBANK.NS",
     "icici bank": "ICICIBANK.NS",
+    "icicibank": "ICICIBANK.NS",
     "sbi": "SBIN.NS",
+    "sbin": "SBIN.NS",
     "state bank of india": "SBIN.NS",
-    "tata motors": "TATAMOTORS.NS",
-    "tatamotors": "TATAMOTORS.NS",
+    "state bank": "SBIN.NS",
+    "tata motors": "TMCV.NS",
+    "tatamotors": "TMCV.NS",
+    "tmcv": "TMCV.NS",
+    "tmpv": "TMPV.NS",
+    "tata motors pass": "TMPV.NS",
+    "tata steel": "TATASTEEL.NS",
+    "tatasteel": "TATASTEEL.NS",
+    "tata power": "TATAPOWER.NS",
+    "tatapower": "TATAPOWER.NS",
     "bharti airtel": "BHARTIARTL.NS",
     "airtel": "BHARTIARTL.NS",
+    "bhartiartl": "BHARTIARTL.NS",
     "itc": "ITC.NS",
     "hindustan unilever": "HINDUNILVR.NS",
     "hul": "HINDUNILVR.NS",
+    "hindunilvr": "HINDUNILVR.NS",
     "l&t": "LT.NS",
     "larsen": "LT.NS",
+    "lt": "LT.NS",
     "larsen & toubro": "LT.NS",
     "kotak": "KOTAKBANK.NS",
     "kotak bank": "KOTAKBANK.NS",
+    "kotakbank": "KOTAKBANK.NS",
     "axis bank": "AXISBANK.NS",
     "axis": "AXISBANK.NS",
+    "axisbank": "AXISBANK.NS",
     "bajaj finance": "BAJFINANCE.NS",
+    "bajfinance": "BAJFINANCE.NS",
+    "bajaj finserv": "BAJFINSV.NS",
+    "bajfinsv": "BAJFINSV.NS",
     "maruti": "MARUTI.NS",
     "maruti suzuki": "MARUTI.NS",
     "wipro": "WIPRO.NS",
     "titan": "TITAN.NS",
     "sun pharma": "SUNPHARMA.NS",
+    "sunpharma": "SUNPHARMA.NS",
     "asian paints": "ASIANPAINT.NS",
+    "asianpaint": "ASIANPAINT.NS",
     "adani enterprises": "ADANIENT.NS",
+    "adanient": "ADANIENT.NS",
     "adani ports": "ADANIPORTS.NS",
-    "zomato": "ZOMATO.NS",
+    "adaniports": "ADANIPORTS.NS",
+    "adani power": "ADANIPOWER.NS",
+    "adanipower": "ADANIPOWER.NS",
+    "zomato": "ETERNAL.NS",
+    "eternal": "ETERNAL.NS",
+    "paytm": "PAYTM.NS",
+    "one97": "PAYTM.NS",
+    "suzlon": "SUZLON.NS",
+    "bel": "BEL.NS",
+    "bharat electronics": "BEL.NS",
+    "hal": "HAL.NS",
+    "hindustan aeronautics": "HAL.NS",
+    "mrf": "MRF.NS",
+    "irctc": "IRCTC.NS",
+    "coal india": "COALINDIA.NS",
+    "coalindia": "COALINDIA.NS",
+    "ongc": "ONGC.NS",
+    "ntpc": "NTPC.NS",
+    "power grid": "POWERGRID.NS",
+    "powergrid": "POWERGRID.NS",
+    "jsw steel": "JSWSTEEL.NS",
+    "jswsteel": "JSWSTEEL.NS",
+    "vedanta": "VEDL.NS",
+    "vedl": "VEDL.NS",
+    "eicher motors": "EICHERMOT.NS",
+    "eichermot": "EICHERMOT.NS",
+    "hero motocorp": "HEROMOTOCO.NS",
+    "heromotoco": "HEROMOTOCO.NS",
+    "dr reddy": "DRREDDY.NS",
+    "drreddy": "DRREDDY.NS",
+    "cipla": "CIPLA.NS",
+    "apollo hospitals": "APOLLOHOSP.NS",
+    "apollohosp": "APOLLOHOSP.NS",
+    "ultratech cement": "ULTRACEMCO.NS",
+    "ultracemco": "ULTRACEMCO.NS",
+    "grasim": "GRASIM.NS",
+    "trent": "TRENT.NS",
+    "dmart": "DMART.NS",
+    "avenue supermarts": "DMART.NS",
+    "varun beverages": "VBL.NS",
+    "vbl": "VBL.NS",
+    "bhel": "BHEL.NS",
+    "pnb": "PNB.NS",
+    "punjab national bank": "PNB.NS",
+    "bank of baroda": "BANKBARODA.NS",
+    "bankbaroda": "BANKBARODA.NS",
+    "jio financial": "JIOFIN.NS",
+    "jiofin": "JIOFIN.NS",
     
     # US Indices
     "sp500": "^GSPC",
     "s&p 500": "^GSPC",
     "s&p": "^GSPC",
+    "spy": "SPY",
     "nasdaq": "^IXIC",
+    "qqq": "QQQ",
     "dow": "^DJI",
     "dow jones": "^DJI",
+    "dia": "DIA",
+    "russell": "IWM",
+    "iwm": "IWM",
     
     # Top US Equities
     "apple": "AAPL",
+    "aapl": "AAPL",
     "microsoft": "MSFT",
+    "msft": "MSFT",
     "google": "GOOGL",
+    "googl": "GOOGL",
+    "goog": "GOOG",
     "alphabet": "GOOGL",
     "amazon": "AMZN",
+    "amzn": "AMZN",
     "nvidia": "NVDA",
+    "nvda": "NVDA",
     "tesla": "TSLA",
+    "tsla": "TSLA",
     "meta": "META",
     "facebook": "META",
     "netflix": "NFLX",
+    "nflx": "NFLX",
     "amd": "AMD",
+    "intel": "INTC",
+    "intc": "INTC",
+    "broadcom": "AVGO",
+    "avgo": "AVGO",
+    "qualcomm": "QCOM",
+    "qcom": "QCOM",
+    "tsmc": "TSM",
+    "tsm": "TSM",
     "berkshire": "BRK-B",
+    "berkshire hathaway": "BRK-B",
+    "brk.b": "BRK-B",
+    "brk-b": "BRK-B",
+    "brkb": "BRK-B",
     "jpmorgan": "JPM",
+    "jpm": "JPM",
     "visa": "V",
-    "walmart": "WMT"
+    "walmart": "WMT",
+    "wmt": "WMT",
+    "costco": "COST",
+    "cost": "COST",
+    "palantir": "PLTR",
+    "pltr": "PLTR",
+    "coinbase": "COIN",
+    "coin": "COIN",
+    "uber": "UBER",
+    "airbnb": "ABNB",
+    "abnb": "ABNB",
+    "disney": "DIS",
+    "dis": "DIS",
+    "coca cola": "KO",
+    "ko": "KO",
+    "pepsi": "PEP",
+    "pep": "PEP"
 }
 
 def get_currency_symbol(currency_code: str, ticker: str) -> str:
     """Returns currency symbol based on currency code or ticker."""
-    if ".NS" in ticker or ".BO" in ticker or currency_code == "INR":
+    if ".NS" in ticker or ".BO" in ticker or currency_code == "INR" or ticker.startswith("^NSE") or ticker.startswith("^BSE"):
         return "₹"
     elif currency_code == "USD" or not currency_code:
         return "$"
@@ -118,86 +233,123 @@ def get_currency_symbol(currency_code: str, ticker: str) -> str:
         return "¥"
     return f"{currency_code} "
 
+def is_valid_ticker(ticker_sym: str) -> bool:
+    """Quick validation to check if symbol has price data on Yahoo Finance."""
+    try:
+        t = yf.Ticker(ticker_sym)
+        hist = t.history(period="3d")
+        return not hist.empty
+    except Exception:
+        return False
+
 def resolve_ticker(query: str, preferred_market: Optional[str] = None) -> Optional[str]:
     """
     Intelligently resolves company names or symbols to a validated Yahoo Finance ticker.
     Handles US and Indian markets with priority awareness.
     """
-    cleaned = query.strip().lower()
+    raw_q = query.strip()
+    if not raw_q:
+        return None
+
+    cleaned = raw_q.lower()
     
-    # Direct alias match
+    # 1. Direct Alias Check
     if cleaned in POPULAR_ALIASES:
         return POPULAR_ALIASES[cleaned]
     
-    # Remove common prefix/suffix words
+    # 2. Normalized check (strip punctuation and common suffix words)
     cleaned_norm = re.sub(r'\b(stock|share|price|predict|forecast|quote|ltd|limited|inc|corp)\b', '', cleaned).strip()
     if cleaned_norm in POPULAR_ALIASES:
         return POPULAR_ALIASES[cleaned_norm]
-        
-    # If the user already provided an uppercase ticker with or without exchange suffix
-    raw_upper = query.strip().upper()
-    if re.match(r'^[A-Z0-9\.\-\^]{1,12}$', raw_upper):
-        try:
-            t = yf.Ticker(raw_upper)
-            hist = t.history(period="3d")
-            if not hist.empty:
-                return raw_upper
-        except Exception:
-            pass
 
-    # If user wants Indian market specifically or company likely Indian
+    # Handle standard ticker notation quirks (e.g. BRK.B -> BRK-B)
+    raw_upper = raw_q.upper().replace("/", "-")
+    if "." in raw_upper and not (raw_upper.endswith(".NS") or raw_upper.endswith(".BO")):
+        test_dash = raw_upper.replace(".", "-")
+        if test_dash.lower() in POPULAR_ALIASES:
+            return POPULAR_ALIASES[test_dash.lower()]
+        if is_valid_ticker(test_dash):
+            return test_dash
+
+    # 3. If user provided explicit Indian exchange suffix (.NS or .BO)
+    if raw_upper.endswith(".NS") or raw_upper.endswith(".BO") or raw_upper.startswith("^"):
+        if is_valid_ticker(raw_upper):
+            return raw_upper
+            
+    # 4. Indian market bias or query looks like an Indian stock
     is_indian_intent = (
         preferred_market == "in" or
         "india" in cleaned or
         "nse" in cleaned or
         "bse" in cleaned
     )
-    
-    # Query Yahoo Finance search API
+
+    if is_indian_intent:
+        # Check {raw_upper}.NS first for immediate resolution
+        test_ns = f"{raw_upper}.NS"
+        if is_valid_ticker(test_ns):
+            return test_ns
+        test_bo = f"{raw_upper}.BO"
+        if is_valid_ticker(test_bo):
+            return test_bo
+
+    # 5. Check raw symbol directly if US preference or standard US ticker
+    if preferred_market == "us":
+        if is_valid_ticker(raw_upper):
+            return raw_upper
+
+    # 6. Query Yahoo Finance Search API
     try:
         search_q = cleaned_norm if cleaned_norm else cleaned
         url = f"https://query2.finance.yahoo.com/v1/finance/search?q={requests.utils.quote(search_q)}&quotesCount=10"
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
-        resp = requests.get(url, headers=headers, timeout=5)
+        resp = requests.get(url, headers=headers, timeout=4)
         if resp.status_code == 200:
             data = resp.json()
             quotes = data.get('quotes', [])
-            
-            if is_indian_intent:
-                # Prioritize Indian listings (.NS or .BO)
-                for q in quotes:
-                    sym = q.get('symbol', '')
-                    if sym.endswith('.NS') or sym.endswith('.BO'):
-                        if not yf.Ticker(sym).history(period="3d").empty:
-                            return sym
 
-            # General match: check top returned symbols
+            # Filter quotes by exchange and market intent
+            indian_candidates = []
+            us_candidates = []
+            general_candidates = []
+
             for q in quotes:
                 sym = q.get('symbol', '')
-                if sym:
-                    try:
-                        if not yf.Ticker(sym).history(period="3d").empty:
-                            return sym
-                    except Exception:
-                        continue
-    except Exception as e:
-        pass
+                exch = q.get('exchange', '')
+                if not sym:
+                    continue
+                if sym.endswith('.NS') or sym.endswith('.BO') or exch in ['NSI', 'BSE']:
+                    indian_candidates.append(sym)
+                elif exch in ['NYQ', 'NMS', 'NGM', 'NCM', 'NAS', 'PCX', 'BTS', 'DJI', 'SNP'] or ('.' not in sym and '^' not in sym):
+                    us_candidates.append(sym)
+                else:
+                    general_candidates.append(sym)
 
-    # Try common Indian suffixes as fallback if looks like an Indian stock name
-    for suffix in [".NS", ".BO"]:
-        test_sym = raw_upper + suffix
-        try:
-            if not yf.Ticker(test_sym).history(period="3d").empty:
-                return test_sym
-        except Exception:
-            pass
-            
-    # Try raw ticker directly
-    try:
-        if not yf.Ticker(raw_upper).history(period="3d").empty:
-            return raw_upper
+            if is_indian_intent:
+                candidates_to_try = indian_candidates + general_candidates + us_candidates
+            elif preferred_market == "us":
+                candidates_to_try = us_candidates + general_candidates + indian_candidates
+            else:
+                # Neutral / auto-detect: try Indian if company looks Indian or has .NS in top results
+                if indian_candidates and quotes[0].get('symbol', '').endswith(('.NS', '.BO')):
+                    candidates_to_try = indian_candidates + us_candidates + general_candidates
+                else:
+                    candidates_to_try = [quotes[0].get('symbol')] + indian_candidates + us_candidates
+
+            for sym in candidates_to_try:
+                if sym and is_valid_ticker(sym):
+                    return sym
+
     except Exception:
         pass
+
+    # 7. Final fallback tests: try .NS then raw_upper
+    test_ns = f"{raw_upper}.NS"
+    if is_valid_ticker(test_ns):
+        return test_ns
+
+    if is_valid_ticker(raw_upper):
+        return raw_upper
 
     return None
 
@@ -222,10 +374,10 @@ def calculate_technical_indicators(df: pd.DataFrame) -> pd.DataFrame:
     df['ret_10d'] = close.pct_change(10)
     
     # 2. Moving Average Distance Ratios (Stationary)
-    sma_10 = close.rolling(10).mean()
-    sma_20 = close.rolling(20).mean()
-    sma_50 = close.rolling(50).mean()
-    sma_200 = close.rolling(200).mean()
+    sma_10 = close.rolling(10, min_periods=5).mean()
+    sma_20 = close.rolling(20, min_periods=10).mean()
+    sma_50 = close.rolling(50, min_periods=15).mean()
+    sma_200 = close.rolling(200, min_periods=20).mean()
     
     df['sma_10_ratio'] = (close / sma_10) - 1.0
     df['sma_20_ratio'] = (close / sma_20) - 1.0
@@ -286,8 +438,16 @@ def predict_stock(ticker: str) -> Optional[Dict[str, Any]]:
     """
     try:
         ticker_obj = yf.Ticker(ticker)
-        fast_info = getattr(ticker_obj, 'fast_info', {})
-        currency_code = fast_info.get('currency', 'USD')
+        
+        # Safe currency determination
+        currency_code = "INR" if (".NS" in ticker or ".BO" in ticker or ticker.startswith("^NSE") or ticker.startswith("^BSE")) else "USD"
+        try:
+            if hasattr(ticker_obj, 'fast_info') and ticker_obj.fast_info is not None:
+                c = ticker_obj.fast_info.get('currency')
+                if c:
+                    currency_code = c
+        except Exception:
+            pass
         currency_sym = get_currency_symbol(currency_code, ticker)
         
         # Meta info
@@ -302,12 +462,12 @@ def predict_stock(ticker: str) -> Optional[Dict[str, Any]]:
         except Exception:
             pass
             
-        # Download 3 years of daily historical data
+        # Download historical data (up to 3y)
         hist = ticker_obj.history(period="3y", interval="1d")
-        if hist.empty or len(hist) < 220:
+        if hist.empty or len(hist) < 60:
             # Fallback to yf.download
             hist = yf.download(ticker, period="3y", interval="1d", progress=False)
-            if hist.empty or len(hist) < 150:
+            if hist.empty or len(hist) < 40:
                 return None
                 
         df = calculate_technical_indicators(hist)
@@ -321,7 +481,7 @@ def predict_stock(ticker: str) -> Optional[Dict[str, Any]]:
         ]
         
         clean_df = df.dropna(subset=feature_cols + ['target_return']).copy()
-        if len(clean_df) < 100:
+        if len(clean_df) < 30:
             return None
             
         X = clean_df[feature_cols]
