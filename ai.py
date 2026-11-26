@@ -426,6 +426,13 @@ def calculate_technical_indicators(df: pd.DataFrame) -> pd.DataFrame:
     # 9. Daily Intraday Spread
     df['intraday_spread'] = (high - low) / close
     
+    # 10. Stochastic Oscillator (%K, %D - 14-period)
+    low_14 = low.rolling(14, min_periods=5).min()
+    high_14 = high.rolling(14, min_periods=5).max()
+    stoch_k = 100.0 * (close - low_14) / ((high_14 - low_14) + 1e-9)
+    df['stoch_k'] = stoch_k
+    df['stoch_d'] = stoch_k.rolling(3, min_periods=1).mean()
+    
     # Target: Next Day Return (Close_{t+1} / Close_t - 1)
     df['target_return'] = df['ret_1d'].shift(-1)
     
@@ -450,15 +457,30 @@ def predict_stock(ticker: str) -> Optional[Dict[str, Any]]:
             pass
         currency_sym = get_currency_symbol(currency_code, ticker)
         
-        # Meta info
+        # Meta info & Fundamentals
         company_name = ticker
         sector = "General Market"
         industry = "Equity"
+        market_cap = None
+        pe_ratio = None
+        week_52_high = None
+        week_52_low = None
+        beta = None
+        dividend_yield = None
+        avg_volume = None
+
         try:
-            info = ticker_obj.info
+            info = ticker_obj.info or {}
             company_name = info.get('longName', info.get('shortName', ticker))
             sector = info.get('sector', sector)
             industry = info.get('industry', industry)
+            market_cap = info.get('marketCap')
+            pe_ratio = info.get('trailingPE') or info.get('forwardPE')
+            week_52_high = info.get('fiftyTwoWeekHigh')
+            week_52_low = info.get('fiftyTwoWeekLow')
+            beta = info.get('beta')
+            dividend_yield = info.get('dividendYield')
+            avg_volume = info.get('averageVolume') or info.get('averageDailyVolume10Day')
         except Exception:
             pass
             
@@ -548,20 +570,75 @@ def predict_stock(ticker: str) -> Optional[Dict[str, Any]]:
         range_lower = max(0.01, predicted_close - range_margin)
         range_upper = predicted_close + range_margin
         
-        # Support and Resistance
+        # 5-Day Swing Projection
+        pred_5d_return = float(np.clip(pred_return * 2.2, -0.20, 0.20))
+        predicted_5d_price = current_close * (1.0 + pred_5d_return)
+        range_5d_lower = max(0.01, predicted_5d_price - (2.2 * range_margin))
+        range_5d_upper = predicted_5d_price + (2.2 * range_margin)
+        
+        # Support and Resistance Ladder
         recent_20 = df['Close'].iloc[-20:]
         recent_high = float(df['High'].iloc[-20:].max())
         recent_low = float(df['Low'].iloc[-20:].min())
         pivot = (recent_high + recent_low + current_close) / 3.0
         r1 = (2.0 * pivot) - recent_low
         s1 = (2.0 * pivot) - recent_high
+        r2 = pivot + (recent_high - recent_low)
+        s2 = pivot - (recent_high - recent_low)
         
-        # Chart Data for Frontend (last 90 trading days)
-        chart_slice = df.iloc[-90:].copy()
+        # 52-Week High & Low fallback
+        if week_52_high is None and len(df) >= 20:
+            week_52_high = float(df['High'].iloc[-252:].max()) if len(df) >= 252 else float(df['High'].max())
+        if week_52_low is None and len(df) >= 20:
+            week_52_low = float(df['Low'].iloc[-252:].min()) if len(df) >= 252 else float(df['Low'].min())
+            
+        # Stochastic Oscillator values
+        latest_stoch_k = float(df['stoch_k'].iloc[-1]) if 'stoch_k' in df else 50.0
+        latest_stoch_d = float(df['stoch_d'].iloc[-1]) if 'stoch_d' in df else 50.0
+
+        # Technical Consensus Breakdown
+        bullish_count = 0
+        bearish_count = 0
+        neutral_count = 0
+
+        sma10_val = float(df['Close'].rolling(10, min_periods=5).mean().iloc[-1])
+        sma20_val = float(df['Close'].rolling(20, min_periods=10).mean().iloc[-1])
+        sma50_val = float(df['Close'].rolling(50, min_periods=15).mean().iloc[-1])
+        sma200_val = float(df['Close'].rolling(200, min_periods=20).mean().iloc[-1])
+
+        if current_close > sma10_val: bullish_count += 1
+        else: bearish_count += 1
+
+        if current_close > sma20_val: bullish_count += 1
+        else: bearish_count += 1
+
+        if current_close > sma50_val: bullish_count += 1
+        else: bearish_count += 1
+
+        if current_close > sma200_val: bullish_count += 1
+        else: bearish_count += 1
+
+        if latest_rsi > 70: bearish_count += 1
+        elif latest_rsi < 30: bullish_count += 1
+        else: neutral_count += 1
+
+        if latest_macd_hist > 0: bullish_count += 1
+        else: bearish_count += 1
+
+        if latest_stoch_k > latest_stoch_d and latest_stoch_k < 80: bullish_count += 1
+        elif latest_stoch_k < latest_stoch_d and latest_stoch_k > 20: bearish_count += 1
+        else: neutral_count += 1
+
+        if pred_return > 0.001: bullish_count += 2
+        elif pred_return < -0.001: bearish_count += 2
+        else: neutral_count += 1
+
+        # Chart Data for Frontend (full history up to 252 trading days)
+        chart_slice = df.iloc[-252:].copy() if len(df) >= 252 else df.copy()
         dates_list = [d.strftime('%Y-%m-%d') if hasattr(d, 'strftime') else str(d)[:10] for d in chart_slice.index]
         close_list = [round(float(p), 2) for p in chart_slice['Close']]
-        sma20_series = df['Close'].rolling(20).mean().iloc[-90:]
-        sma50_series = df['Close'].rolling(50).mean().iloc[-90:]
+        sma20_series = df['Close'].rolling(20, min_periods=5).mean().reindex(chart_slice.index)
+        sma50_series = df['Close'].rolling(50, min_periods=10).mean().reindex(chart_slice.index)
         sma20_list = [round(float(p), 2) if not np.isnan(p) else None for p in sma20_series]
         sma50_list = [round(float(p), 2) if not np.isnan(p) else None for p in sma50_series]
         volume_list = [int(v) if not np.isnan(v) else 0 for v in chart_slice['Volume']]
@@ -583,31 +660,14 @@ def predict_stock(ticker: str) -> Optional[Dict[str, Any]]:
             'next_date': next_date_str,
             'predicted_price': round(predicted_close, 2),
             'range_lower': round(range_lower, 2),
-            'range_upper': round(range_upper, 2)
+            'range_upper': round(range_upper, 2),
+            'predicted_5d_price': round(predicted_5d_price, 2),
+            'range_5d_lower': round(range_5d_lower, 2),
+            'range_5d_upper': round(range_5d_upper, 2)
         }
         
         # Qualitative Signal Analysis
-        bullish_score = 0
-        if pred_return > 0.001:
-            bullish_score += 2
-        elif pred_return < -0.001:
-            bullish_score -= 2
-            
-        if latest_rsi < 35:
-            bullish_score += 1  # oversold bounce candidate
-        elif latest_rsi > 70:
-            bullish_score -= 1  # overbought risk
-            
-        if latest_macd_hist > 0:
-            bullish_score += 1
-        else:
-            bullish_score -= 1
-            
-        if current_close > df['Close'].rolling(50).mean().iloc[-1]:
-            bullish_score += 1
-        else:
-            bullish_score -= 1
-            
+        bullish_score = bullish_count - bearish_count
         if bullish_score >= 3:
             signal = "STRONG BUY / BULLISH 🟢"
         elif bullish_score >= 1:
@@ -629,18 +689,37 @@ def predict_stock(ticker: str) -> Optional[Dict[str, Any]]:
             'current_price': current_close,
             'predicted_price': predicted_close,
             'predicted_return_pct': pred_return * 100.0,
+            'predicted_5d_price': predicted_5d_price,
+            'predicted_5d_return_pct': pred_5d_return * 100.0,
             'signal': signal,
+            'bullish_count': bullish_count,
+            'bearish_count': bearish_count,
+            'neutral_count': neutral_count,
             'directional_hit_rate': directional_hit_rate,
             'mape': mape,
             'confidence_range_lower': range_lower,
             'confidence_range_upper': range_upper,
+            'confidence_5d_lower': range_5d_lower,
+            'confidence_5d_upper': range_5d_upper,
             'atr': latest_atr,
             'rsi': latest_rsi,
+            'stoch_k': latest_stoch_k,
+            'stoch_d': latest_stoch_d,
             'annualized_volatility_pct': latest_vol,
+            'pivot': pivot,
             'support_s1': s1,
+            'support_s2': s2,
             'resistance_r1': r1,
+            'resistance_r2': r2,
             'swing_high_20d': recent_high,
             'swing_low_20d': recent_low,
+            'market_cap': market_cap,
+            'pe_ratio': pe_ratio,
+            'week_52_high': week_52_high,
+            'week_52_low': week_52_low,
+            'beta': beta,
+            'dividend_yield': dividend_yield,
+            'avg_volume': avg_volume,
             'chart_data': chart_data
         }
         
@@ -653,6 +732,22 @@ def format_prediction_report(res: Dict[str, Any]) -> str:
     arrow = "▲" if res['predicted_return_pct'] >= 0 else "▼"
     sign = "+" if res['predicted_return_pct'] >= 0 else ""
     
+    arrow_5d = "▲" if res.get('predicted_5d_return_pct', 0) >= 0 else "▼"
+    sign_5d = "+" if res.get('predicted_5d_return_pct', 0) >= 0 else ""
+    
+    # Format Market Cap
+    mcap_str = "N/A"
+    if res.get('market_cap'):
+        mcap = res['market_cap']
+        if res['currency_code'] == 'INR':
+            mcap_str = f"₹{mcap/1e12:.2f} Lakh Cr" if mcap >= 1e12 else f"₹{mcap/1e7:.2f} Cr"
+        else:
+            mcap_str = f"${mcap/1e12:.2f}T" if mcap >= 1e12 else (f"${mcap/1e9:.2f}B" if mcap >= 1e9 else f"${mcap:,.0f}")
+
+    pe_str = f"{res['pe_ratio']:.2f}" if res.get('pe_ratio') else "N/A"
+    high52_str = f"{cs}{res['week_52_high']:,.2f}" if res.get('week_52_high') else "N/A"
+    low52_str = f"{cs}{res['week_52_low']:,.2f}" if res.get('week_52_low') else "N/A"
+
     report = f"""
 {'='*70}
 📊 QUANTITATIVE PREDICTION & ANALYSIS REPORT
@@ -662,19 +757,28 @@ Sector / Ind:  {res['sector']} | {res['industry']}
 Market / Curr: {res['currency_code']} ({cs})
 
 💵 Current Price:           {cs}{res['current_price']:,.2f}
-🎯 Expected Next Close:     {cs}{res['predicted_price']:,.2f} ({arrow} {sign}{res['predicted_return_pct']:.2f}%)
+🎯 1-Day Next Close:        {cs}{res['predicted_price']:,.2f} ({arrow} {sign}{res['predicted_return_pct']:.2f}%)
+🌊 5-Day Swing Target:      {cs}{res.get('predicted_5d_price', res['predicted_price']):,.2f} ({arrow_5d} {sign_5d}{res.get('predicted_5d_return_pct', 0):.2f}%)
 🚦 Overall Signal:          {res['signal']}
+⚖️ Consensus Setup:         {res.get('bullish_count', 0)} Buy | {res.get('neutral_count', 0)} Neutral | {res.get('bearish_count', 0)} Sell
 
-🛡️ 95% Confidence Range:   {cs}{res['confidence_range_lower']:,.2f}  ───►  {cs}{res['confidence_range_upper']:,.2f}
+🛡️ 1-Day 95% Corridor:      {cs}{res['confidence_range_lower']:,.2f}  ───►  {cs}{res['confidence_range_upper']:,.2f}
 📈 Directional Hit Rate:    {res['directional_hit_rate']:.1f}% (Out-of-sample Win Rate)
 📉 Model Price Error (MAPE): {res['mape']:.2f}%
 
-[ TECHNICAL CONTEXT ]
+[ FUNDAMENTALS & VALUATION ]
+• Market Capitalization:   {mcap_str}
+• P/E Ratio:               {pe_str}
+• 52-Week Range:           {low52_str}  ───►  {high52_str}
+• Volatility Beta:         {f"{res['beta']:.2f}" if res.get('beta') is not None else 'N/A'}
+
+[ TECHNICAL CONTEXT & PIVOTS ]
 • RSI (14-day):            {res['rsi']:.1f} ({'Oversold' if res['rsi'] < 30 else 'Overbought' if res['rsi'] > 70 else 'Neutral'})
-• Volatility (Annualized): {res['annualized_volatility_pct']:.1f}%
-• Daily True Range (ATR):  {cs}{res['atr']:,.2f}
-• Key Support (S1):        {cs}{res['support_s1']:,.2f} (20D Low: {cs}{res['swing_low_20d']:,.2f})
-• Key Resistance (R1):     {cs}{res['resistance_r1']:,.2f} (20D High: {cs}{res['swing_high_20d']:,.2f})
+• Stochastic (%K / %D):    {res.get('stoch_k', 50):.1f} / {res.get('stoch_d', 50):.1f}
+• Daily True Range (ATR):  {cs}{res['atr']:,.2f} (Annual Vol: {res['annualized_volatility_pct']:.1f}%)
+• Resistance Ladder:       R2: {cs}{res.get('resistance_r2', res['resistance_r1']*1.02):,.2f} | R1: {cs}{res['resistance_r1']:,.2f}
+• Pivot Point:             {cs}{res.get('pivot', res['current_price']):,.2f}
+• Support Ladder:          S1: {cs}{res['support_s1']:,.2f} | S2: {cs}{res.get('support_s2', res['support_s1']*0.98):,.2f}
 
 ℹ️ MATHEMATICAL & MARKET REALITY:
 No algorithm can guarantee 100% price accuracy due to market stochasticity,

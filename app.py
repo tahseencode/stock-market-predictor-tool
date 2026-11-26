@@ -5,7 +5,9 @@ Provides REST API endpoints and serves the modern interactive web frontend.
 
 import os
 import sys
-from typing import Optional, Dict, Any
+import time
+from threading import Lock
+from typing import Optional, Dict, Any, Tuple
 from pathlib import Path
 
 from fastapi import FastAPI, Query, HTTPException
@@ -13,6 +15,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+import requests
 import uvicorn
 
 # Import quantitative prediction engine from ai.py
@@ -28,8 +31,13 @@ from ai import (
 app = FastAPI(
     title="QuantPulse Stock Predictor API",
     description="Quantitative AI Stock Prediction for US and Indian Markets",
-    version="2.0.0"
+    version="2.1.0"
 )
+
+# In-Memory Cache for fast sub-millisecond responses
+PREDICTION_CACHE: Dict[str, Tuple[float, Dict[str, Any]]] = {}
+CACHE_TTL_SECONDS = 300  # 5 minutes
+cache_lock = Lock()
 
 # Enable CORS
 app.add_middleware(
@@ -77,7 +85,7 @@ def search_suggestions(q: str = Query(..., min_length=1)):
     matches = []
     seen_symbols = set()
     
-    # Match aliases
+    # Match aliases first
     for name, sym in POPULAR_ALIASES.items():
         if sym in seen_symbols:
             continue
@@ -92,6 +100,39 @@ def search_suggestions(q: str = Query(..., min_length=1)):
             if len(matches) >= 8:
                 break
                 
+    # If fewer than 6 matches, query Yahoo Finance API for global symbols
+    if len(matches) < 6 and len(query) >= 2:
+        try:
+            url = f"https://query2.finance.yahoo.com/v1/finance/search?q={requests.utils.quote(query)}&quotesCount=6"
+            headers = {'User-Agent': 'Mozilla/5.0'}
+            resp = requests.get(url, headers=headers, timeout=2.5)
+            if resp.status_code == 200:
+                data = resp.json()
+                for item in data.get('quotes', []):
+                    sym = item.get('symbol', '')
+                    if not sym or sym in seen_symbols:
+                        continue
+                    name = item.get('shortname') or item.get('longname') or sym
+                    exch = item.get('exchange', '')
+                    if sym.endswith('.NS') or exch == 'NSI':
+                        mkt = "India (NSE)"
+                    elif sym.endswith('.BO') or exch == 'BSE':
+                        mkt = "India (BSE)"
+                    elif exch in ['NYQ', 'NMS', 'NGM', 'NCM', 'NAS', 'PCX', 'BTS']:
+                        mkt = "US (NYSE/NASDAQ)"
+                    else:
+                        mkt = "Global"
+                    matches.append({
+                        "name": name,
+                        "symbol": sym,
+                        "market": mkt
+                    })
+                    seen_symbols.add(sym)
+                    if len(matches) >= 8:
+                        break
+        except Exception:
+            pass
+
     return {"suggestions": matches}
 
 @app.get("/api/predict")
@@ -101,7 +142,7 @@ def api_predict(
 ):
     """
     Resolves symbol, downloads historical data, runs feature engineering and ensemble ML,
-    and returns full quantitative prediction metrics and chart data.
+    and returns full quantitative prediction metrics and chart data. Uses in-memory caching for speed.
     """
     resolved_sym = resolve_ticker(query, preferred_market=market)
     if not resolved_sym:
@@ -113,6 +154,19 @@ def api_predict(
             }
         )
         
+    cache_key = f"{resolved_sym.upper()}_{market or 'auto'}"
+    now = time.time()
+    with cache_lock:
+        if cache_key in PREDICTION_CACHE:
+            cached_time, cached_data = PREDICTION_CACHE[cache_key]
+            if now - cached_time < CACHE_TTL_SECONDS:
+                return {
+                    "success": True,
+                    "ticker": resolved_sym,
+                    "data": cached_data,
+                    "cached": True
+                }
+
     result = predict_stock(resolved_sym)
     if not result:
         return JSONResponse(
@@ -122,11 +176,19 @@ def api_predict(
                 "error": f"Insufficient historical trading data available for '{resolved_sym}'."
             }
         )
+
+    with cache_lock:
+        PREDICTION_CACHE[cache_key] = (now, result)
+        if len(PREDICTION_CACHE) > 200:
+            oldest = sorted(PREDICTION_CACHE.keys(), key=lambda k: PREDICTION_CACHE[k][0])[:50]
+            for ok in oldest:
+                del PREDICTION_CACHE[ok]
         
     return {
         "success": True,
         "ticker": resolved_sym,
-        "data": result
+        "data": result,
+        "cached": False
     }
 
 @app.post("/api/chat")

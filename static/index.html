@@ -210,31 +210,74 @@
           </div>
 
           <!-- Price Comparison Display -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 p-4 rounded-xl bg-slate-950/60 border border-slate-800/80">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 rounded-xl bg-slate-950/60 border border-slate-800/80">
             <div>
               <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Current Market Close</p>
-              <div class="text-3xl font-extrabold font-mono text-slate-200" id="currentPrice">₹1,377.50</div>
-              <p class="text-xs text-slate-500 mt-1">Latest confirmed trading session</p>
+              <div class="text-2xl sm:text-3xl font-extrabold font-mono text-slate-200" id="currentPrice">₹1,377.50</div>
+              <p class="text-[11px] text-slate-500 mt-1">Confirmed session close</p>
             </div>
 
-            <div class="border-t sm:border-t-0 sm:border-l border-slate-800 pt-4 sm:pt-0 sm:pl-6">
-              <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Expected Next Session Close</p>
-              <div class="flex items-baseline gap-3">
-                <div class="text-3xl font-extrabold font-mono text-emerald-400" id="predictedPrice">₹1,378.22</div>
-                <div id="returnPill" class="px-2.5 py-1 rounded-lg text-xs font-bold font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+            <div class="border-t sm:border-t-0 sm:border-l border-slate-800 pt-3 sm:pt-0 sm:pl-4">
+              <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">1-Day Next Session Target</p>
+              <div class="flex items-baseline gap-2">
+                <div class="text-2xl sm:text-3xl font-extrabold font-mono text-emerald-400" id="predictedPrice">₹1,378.22</div>
+                <div id="returnPill" class="px-2 py-0.5 rounded text-[11px] font-bold font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
                   <i class="fa-solid fa-arrow-trend-up"></i>
                   <span id="returnText">+0.05%</span>
                 </div>
               </div>
-              <p class="text-xs text-slate-500 mt-1">Derived from stationary ensemble return</p>
+              <p class="text-[11px] text-slate-500 mt-1">1-Day ML predicted target</p>
+            </div>
+
+            <div class="border-t sm:border-t-0 sm:border-l border-slate-800 pt-3 sm:pt-0 sm:pl-4">
+              <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">5-Day Swing Target</p>
+              <div class="flex items-baseline gap-2">
+                <div class="text-2xl sm:text-3xl font-extrabold font-mono text-cyan-400" id="predicted5dPrice">₹1,385.00</div>
+                <div id="return5dPill" class="px-2 py-0.5 rounded text-[11px] font-bold font-mono bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 flex items-center gap-1">
+                  <span id="return5dText">+0.55%</span>
+                </div>
+              </div>
+              <p class="text-[11px] text-slate-500 mt-1">5-Day projected swing target</p>
+            </div>
+          </div>
+
+          <!-- Fundamentals Bar -->
+          <div class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3 border-t border-slate-800/80 text-xs">
+            <div class="p-2.5 rounded-lg bg-slate-950/40 border border-slate-800/60">
+              <span class="text-slate-500 block text-[10px] uppercase font-semibold">Market Cap</span>
+              <span id="marketCapText" class="font-bold font-mono text-slate-200">--</span>
+            </div>
+            <div class="p-2.5 rounded-lg bg-slate-950/40 border border-slate-800/60">
+              <span class="text-slate-500 block text-[10px] uppercase font-semibold">P/E Ratio</span>
+              <span id="peRatioText" class="font-bold font-mono text-slate-200">--</span>
+            </div>
+            <div class="p-2.5 rounded-lg bg-slate-950/40 border border-slate-800/60">
+              <span class="text-slate-500 block text-[10px] uppercase font-semibold">Beta (Volatility)</span>
+              <span id="betaText" class="font-bold font-mono text-slate-200">--</span>
+            </div>
+            <div class="p-2.5 rounded-lg bg-slate-950/40 border border-slate-800/60">
+              <span class="text-slate-500 block text-[10px] uppercase font-semibold">Div Yield</span>
+              <span id="divYieldText" class="font-bold font-mono text-slate-200">--</span>
+            </div>
+          </div>
+
+          <!-- 52-Week Range Bar -->
+          <div class="mt-3 space-y-1">
+            <div class="flex justify-between items-center text-[11px]">
+              <span class="text-slate-500">52W Low: <b id="low52Text" class="font-mono text-slate-400">--</b></span>
+              <span class="text-slate-400 font-medium">52-Week Trading Range</span>
+              <span class="text-slate-500">52W High: <b id="high52Text" class="font-mono text-slate-400">--</b></span>
+            </div>
+            <div class="relative h-2 bg-slate-800 rounded-full overflow-hidden">
+              <div id="range52Bar" class="absolute inset-y-0 bg-gradient-to-r from-emerald-500 via-cyan-400 to-amber-400 rounded-full" style="left: 0%; width: 50%;"></div>
             </div>
           </div>
 
           <!-- 95% Confidence Corridor Visualizer -->
-          <div class="mt-6 space-y-2">
+          <div class="mt-4 space-y-2 pt-3 border-t border-slate-800/80">
             <div class="flex justify-between items-center text-xs">
               <span class="text-slate-400 font-medium flex items-center gap-1">
-                <i class="fa-solid fa-shield-halved text-cyan-400"></i> 95% Confidence Trading Corridor:
+                <i class="fa-solid fa-shield-halved text-cyan-400"></i> 1-Day 95% Trading Corridor:
               </span>
               <span class="text-slate-300 font-mono text-xs">
                 <span id="rangeLowerText">₹1,314.81</span> ──► <span id="rangeUpperText">₹1,441.62</span>
@@ -245,9 +288,9 @@
             <div class="relative h-3 bg-slate-800 rounded-full overflow-hidden p-0.5">
               <div class="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-500/40 via-emerald-500/50 to-cyan-500/40 rounded-full w-full"></div>
             </div>
-            <div class="flex justify-between text-[11px] text-slate-500">
+            <div class="flex justify-between text-[10px] text-slate-500">
               <span>95% Downside Floor (1.96× ATR)</span>
-              <span>Point Estimate</span>
+              <span>Predicted Target</span>
               <span>95% Upside Ceiling (1.96× ATR)</span>
             </div>
           </div>
@@ -294,6 +337,21 @@
                   <span id="atrText" class="font-bold font-mono text-slate-200 text-sm">₹32.35</span>
                 </div>
               </div>
+
+              <!-- Technical Consensus -->
+              <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800/80">
+                <div class="flex justify-between items-center text-xs mb-1">
+                  <span class="text-slate-400">Technical Consensus</span>
+                  <span id="consensusBadge" class="font-bold text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">Bullish Setup</span>
+                </div>
+                <div class="flex items-center gap-1.5 text-[11px] text-slate-400 mt-1">
+                  <span class="text-emerald-400 font-semibold"><i class="fa-solid fa-arrow-trend-up"></i> <span id="bullishCount">0</span> Buy</span>
+                  <span class="text-slate-600">|</span>
+                  <span class="text-amber-400 font-semibold"><span id="neutralCount">0</span> Neutral</span>
+                  <span class="text-slate-600">|</span>
+                  <span class="text-rose-400 font-semibold"><i class="fa-solid fa-arrow-trend-down"></i> <span id="bearishCount">0</span> Sell</span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -311,23 +369,35 @@
               <i class="fa-solid fa-chart-area text-emerald-400"></i>
               Interactive Price & Prediction Chart
             </h3>
-            <p class="text-xs text-slate-400">90-Day Historical Trend with 20-Day & 50-Day SMAs and Next-Session Forecast</p>
+            <p class="text-xs text-slate-400" id="chartSubtitle">Multi-Timeframe Trend with Moving Averages & Volume</p>
           </div>
 
-          <!-- Chart Legend Pills -->
-          <div class="flex items-center gap-3 text-xs">
-            <span class="flex items-center gap-1.5 text-slate-300">
-              <span class="w-3 h-0.5 bg-emerald-400 inline-block"></span> Close Price
-            </span>
-            <span class="flex items-center gap-1.5 text-slate-300">
-              <span class="w-3 h-0.5 bg-amber-400 inline-block"></span> SMA 20
-            </span>
-            <span class="flex items-center gap-1.5 text-slate-300">
-              <span class="w-3 h-0.5 bg-purple-400 inline-block"></span> SMA 50
-            </span>
-            <span class="flex items-center gap-1.5 text-slate-300">
-              <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 inline-block animate-ping"></span> Forecast Target
-            </span>
+          <!-- Timeframe Selector & Legend -->
+          <div class="flex flex-wrap items-center gap-3">
+            <!-- Timeframe Pills -->
+            <div class="flex items-center bg-slate-950/80 p-1 rounded-xl border border-slate-800 text-xs">
+              <button class="timeframe-btn px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition font-medium" data-tf="1M">1M</button>
+              <button class="timeframe-btn px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition font-medium" data-tf="3M">3M</button>
+              <button class="timeframe-btn px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/40" data-tf="6M">6M</button>
+              <button class="timeframe-btn px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition font-medium" data-tf="1Y">1Y</button>
+              <button class="timeframe-btn px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition font-medium" data-tf="ALL">ALL</button>
+            </div>
+
+            <!-- Chart Legend Pills -->
+            <div class="flex items-center gap-2.5 text-xs">
+              <span class="flex items-center gap-1.5 text-slate-300">
+                <span class="w-3 h-0.5 bg-emerald-400 inline-block"></span> Close
+              </span>
+              <span class="flex items-center gap-1.5 text-slate-300">
+                <span class="w-3 h-0.5 bg-amber-400 inline-block"></span> SMA 20
+              </span>
+              <span class="flex items-center gap-1.5 text-slate-300">
+                <span class="w-3 h-0.5 bg-purple-400 inline-block"></span> SMA 50
+              </span>
+              <span class="flex items-center gap-1.5 text-slate-300">
+                <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 inline-block animate-ping"></span> Target
+              </span>
+            </div>
           </div>
         </div>
 
@@ -357,38 +427,58 @@
           </div>
           <div class="flex justify-between text-[10px] text-slate-500">
             <span>Oversold &lt;30</span>
+            <span>Neutral 30-70</span>
             <span>Overbought &gt;70</span>
           </div>
         </div>
 
-        <!-- Key Support S1 -->
+        <!-- Stochastic Oscillator Card -->
         <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 backdrop-blur-xl space-y-2">
           <div class="flex justify-between items-center text-xs text-slate-400 font-semibold uppercase">
-            <span>Key Support (S1)</span>
-            <i class="fa-solid fa-layer-group text-slate-500"></i>
+            <span>Stochastic (%K / %D)</span>
+            <i class="fa-solid fa-sliders text-slate-500"></i>
           </div>
-          <div id="supportS1" class="text-2xl font-black font-mono text-emerald-400">₹1,225.67</div>
-          <p class="text-xs text-slate-500">20-Day Low: <span id="swingLow20d" class="font-mono text-slate-400">₹1,152.50</span></p>
+          <div class="flex items-baseline gap-2">
+            <div id="stochValue" class="text-2xl font-black font-mono text-slate-100">72.4 / 68.1</div>
+            <span id="stochStatus" class="text-xs font-semibold px-2 py-0.5 rounded bg-slate-800 text-slate-300">Bullish</span>
+          </div>
+          <p class="text-[11px] text-slate-500">Fast momentum crossover indicator</p>
         </div>
 
-        <!-- Key Resistance R1 -->
-        <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 backdrop-blur-xl space-y-2">
+        <!-- Pivot Point Ladder Card -->
+        <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 backdrop-blur-xl space-y-1.5">
           <div class="flex justify-between items-center text-xs text-slate-400 font-semibold uppercase">
-            <span>Key Resistance (R1)</span>
-            <i class="fa-solid fa-cubes-stacked text-slate-500"></i>
+            <span>Pivot Point Ladder</span>
+            <i class="fa-solid fa-arrows-up-down text-slate-500"></i>
           </div>
-          <div id="resistanceR1" class="text-2xl font-black font-mono text-rose-400">₹1,456.17</div>
-          <p class="text-xs text-slate-500">20-Day High: <span id="swingHigh20d" class="font-mono text-slate-400">₹1,383.00</span></p>
+          <div class="grid grid-cols-2 gap-x-2 text-[11px] font-mono">
+            <span class="text-rose-400">R2: <span id="resistanceR2">--</span></span>
+            <span class="text-emerald-400">S2: <span id="supportS2">--</span></span>
+            <span class="text-rose-300">R1: <span id="resistanceR1">--</span></span>
+            <span class="text-emerald-300">S1: <span id="supportS1">--</span></span>
+          </div>
+          <div class="text-[11px] text-slate-400 pt-1 border-t border-slate-800">
+            Pivot: <span id="pivotPoint" class="font-mono text-slate-200">--</span>
+          </div>
         </div>
 
-        <!-- Risk-to-Reward Ratio -->
+        <!-- 20-Day Swing Extremes -->
         <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 backdrop-blur-xl space-y-2">
           <div class="flex justify-between items-center text-xs text-slate-400 font-semibold uppercase">
-            <span>Stationary Modeling</span>
-            <i class="fa-solid fa-wave-square text-slate-500"></i>
+            <span>20-Day Swing Extremes</span>
+            <i class="fa-solid fa-chart-line text-slate-500"></i>
           </div>
-          <div class="text-lg font-bold text-slate-200">Return-Based</div>
-          <p class="text-xs text-slate-400">Eliminates non-stationary autoregressive persistence traps.</p>
+          <div class="space-y-1 text-xs">
+            <div class="flex justify-between text-slate-300">
+              <span class="text-rose-400">20D High:</span>
+              <span id="swingHigh20d" class="font-mono font-bold">--</span>
+            </div>
+            <div class="flex justify-between text-slate-300">
+              <span class="text-emerald-400">20D Low:</span>
+              <span id="swingLow20d" class="font-mono font-bold">--</span>
+            </div>
+          </div>
+          <p class="text-[10px] text-slate-500">Key breakout & breakdown levels</p>
         </div>
       </div>
 
@@ -421,10 +511,16 @@
             What is my recommended Stop-Loss?
           </button>
           <button class="chat-prompt-btn px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
-            Explain the 95% Confidence Corridor
+            What is the 5-day swing target?
           </button>
           <button class="chat-prompt-btn px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
-            Why is this signal given?
+            Analyze valuation & P/E ratio
+          </button>
+          <button class="chat-prompt-btn px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
+            Show Support & Resistance ladder
+          </button>
+          <button class="chat-prompt-btn px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
+            Explain the 95% Confidence Corridor
           </button>
           <button class="chat-prompt-btn px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
             Can this predict 100% accurately?
