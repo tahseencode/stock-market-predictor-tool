@@ -3,566 +3,577 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QuantPulse AI - Quantitative Stock Predictor (US & Indian Markets)</title>
+  <title>MarketPulse — Institutional Market Analytics & Quantitative Forecasts</title>
   
-  <!-- Google Fonts & FontAwesome -->
+  <!-- Typography & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            slate: {
-              850: '#111827',
-              900: '#0f172a',
-              950: '#070b14',
-            }
-          }
-        }
-      }
-    };
-  </script>
+
+  <!-- Self-Contained Stylesheet -->
+  <link rel="stylesheet" href="/static/style.css">
 
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
-  <!-- Stylesheet -->
-  <link rel="stylesheet" href="/static/style.css">
 </head>
-<body class="bg-slate-950 text-slate-100 antialiased min-h-screen">
+<body>
 
-  <!-- Top Navigation Header -->
-  <header class="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 text-slate-950 text-xl font-black">
-          <i class="fa-solid fa-chart-line"></i>
+<div class="app-layout">
+
+  <!-- Institutional Top Header -->
+  <header class="top-header">
+    <div class="top-header-inner">
+      <a href="/" class="brand-wrapper">
+        <div class="brand-icon">
+          <i class="fa-solid fa-arrow-trend-up"></i>
         </div>
         <div>
-          <div class="flex items-center gap-2">
-            <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">QuantPulse AI</h1>
-            <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">v2.0 Quant</span>
+          <div class="brand-title">
+            MarketPulse
+            <span class="brand-badge">Terminal</span>
           </div>
-          <p class="text-xs text-slate-400">Institutional-Grade Quantitative Stock Predictor</p>
+          <div class="brand-subtitle">Cross-Market Analytics & Quantitative Models</div>
         </div>
-      </div>
+      </a>
 
-      <!-- Market Badges & Status -->
-      <div class="flex items-center gap-3 text-xs">
-        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700/60 text-slate-300">
-          <span class="w-2 h-2 rounded-full bg-orange-400 animate-pulse"></span>
-          <span>🇮🇳 <b>NSE / BSE</b> (₹ INR)</span>
+      <!-- Market Status Badges -->
+      <div class="header-badges">
+        <div class="market-indicator">
+          <span class="dot in"></span>
+          <span>NSE / BSE · ₹ INR</span>
         </div>
-        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700/60 text-slate-300">
-          <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
-          <span>🇺🇸 <b>NYSE / NASDAQ</b> ($ USD)</span>
+        <div class="market-indicator">
+          <span class="dot us"></span>
+          <span>NYSE / NASDAQ · $ USD</span>
         </div>
-        <div id="aiStatusBadge" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
-          <i class="fa-solid fa-microchip"></i>
-          <span id="aiStatusText">Ensemble ML Active</span>
+        <div id="aiStatusBadge" class="market-indicator">
+          <span class="dot live"></span>
+          <span id="aiStatusText">Ensemble Engine Active</span>
         </div>
       </div>
     </div>
   </header>
 
-  <!-- Main Container -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+  <!-- Main Viewport Container -->
+  <main class="main-container">
 
-    <!-- Search & Quick Tickers Section -->
-    <section class="space-y-4">
-      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-2xl backdrop-blur-xl relative">
-        <form id="searchForm" class="flex flex-col sm:flex-row gap-3">
-          <div class="relative flex-1">
-            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 text-lg">
-              <i class="fa-solid fa-magnifying-glass"></i>
-            </div>
-            <input 
-              type="text" 
-              id="tickerInput" 
-              placeholder="Search any stock or company (e.g. Reliance, TCS, Apple, Tesla, Nifty 50, NVDA...)" 
-              autocomplete="off"
-              class="w-full pl-12 pr-4 py-3.5 bg-slate-950/70 border border-slate-700/80 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all text-sm sm:text-base font-medium shadow-inner"
-            >
-            <!-- Auto-suggestions Dropdown -->
-            <div id="suggestionsDropdown" class="hidden absolute left-0 right-0 top-full mt-2 bg-slate-900/95 border border-slate-700 rounded-xl shadow-2xl overflow-hidden z-30 divide-y divide-slate-800"></div>
-          </div>
+    <!-- Search & Quick Ticker Selector Card -->
+    <section class="search-card">
+      <form id="searchForm" class="search-form-row">
+        <div class="search-input-wrapper">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input 
+            type="text" 
+            id="tickerInput" 
+            class="search-input" 
+            placeholder="Search stock, ticker or company (e.g. Reliance, TCS, Apple, NVDA, Nifty 50, S&P 500)..." 
+            autocomplete="off"
+            spellcheck="false"
+          >
+          <span class="search-shortcut-pill">/</span>
 
-          <div class="flex items-center gap-2">
-            <select id="marketFilter" class="bg-slate-950/70 border border-slate-700/80 rounded-xl px-4 py-3.5 text-xs sm:text-sm text-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
-              <option value="">Auto-Detect Market</option>
-              <option value="in">🇮🇳 India (NSE / BSE)</option>
-              <option value="us">🇺🇸 US (NYSE / NASDAQ)</option>
-            </select>
-
-            <button 
-              type="submit" 
-              id="submitBtn"
-              class="px-6 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold rounded-xl transition-all shadow-lg shadow-emerald-500/20 active:scale-95 flex items-center justify-center gap-2 text-sm sm:text-base cursor-pointer"
-            >
-              <span>Analyze</span>
-              <i class="fa-solid fa-arrow-right text-xs"></i>
-            </button>
-          </div>
-        </form>
-
-        <!-- Quick Ticker Chips -->
-        <div class="mt-4 pt-4 border-t border-slate-800/80 flex flex-wrap items-center gap-2 text-xs">
-          <span class="text-slate-500 font-semibold mr-1 flex items-center gap-1">
-            <i class="fa-solid fa-bolt text-amber-400"></i> Popular:
-          </span>
-          
-          <!-- Indian Equities -->
-          <button class="quick-chip px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 text-slate-300 hover:text-white transition" data-ticker="Reliance" data-market="in">
-            🇮🇳 Reliance
-          </button>
-          <button class="quick-chip px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 text-slate-300 hover:text-white transition" data-ticker="TCS" data-market="in">
-            🇮🇳 TCS
-          </button>
-          <button class="quick-chip px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 text-slate-300 hover:text-white transition" data-ticker="HDFC Bank" data-market="in">
-            🇮🇳 HDFC Bank
-          </button>
-          <button class="quick-chip px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 text-slate-300 hover:text-white transition" data-ticker="Tata Motors" data-market="in">
-            🇮🇳 Tata Motors
-          </button>
-          <button class="quick-chip px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 text-slate-300 hover:text-white transition" data-ticker="Tata Steel" data-market="in">
-            🇮🇳 Tata Steel
-          </button>
-          <button class="quick-chip px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 text-slate-300 hover:text-white transition" data-ticker="Zomato" data-market="in">
-            🇮🇳 Zomato
-          </button>
-          <button class="quick-chip px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 text-slate-300 hover:text-white transition" data-ticker="State Bank of India" data-market="in">
-            🇮🇳 SBI
-          </button>
-          <button class="quick-chip px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 text-slate-300 hover:text-white transition" data-ticker="NIFTY 50" data-market="in">
-            🇮🇳 Nifty 50
-          </button>
-
-          <!-- US Equities -->
-          <button class="quick-chip px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 text-slate-300 hover:text-white transition" data-ticker="Apple" data-market="us">
-            🇺🇸 Apple
-          </button>
-          <button class="quick-chip px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 text-slate-300 hover:text-white transition" data-ticker="NVDA" data-market="us">
-            🇺🇸 Nvidia
-          </button>
-          <button class="quick-chip px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 text-slate-300 hover:text-white transition" data-ticker="Tesla" data-market="us">
-            🇺🇸 Tesla
-          </button>
-          <button class="quick-chip px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 text-slate-300 hover:text-white transition" data-ticker="Microsoft" data-market="us">
-            🇺🇸 Microsoft
-          </button>
-          <button class="quick-chip px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 text-slate-300 hover:text-white transition" data-ticker="S&P 500" data-market="us">
-            🇺🇸 S&P 500
-          </button>
+          <!-- Autocomplete Dropdown -->
+          <div id="suggestionsDropdown" class="suggestions-dropdown" style="display: none;"></div>
         </div>
+
+        <select id="marketFilter" class="market-select">
+          <option value="">Auto-Detect Market</option>
+          <option value="in">🇮🇳 India (NSE / BSE)</option>
+          <option value="us">🇺🇸 US (NYSE / NASDAQ)</option>
+        </select>
+
+        <button type="submit" id="submitBtn" class="search-btn">
+          <span>Search</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </form>
+
+      <!-- Quick Watchlist Pills -->
+      <div class="watchlist-bar">
+        <span class="watchlist-label">
+          <i class="fa-solid fa-bookmark"></i> Watchlist:
+        </span>
+        
+        <!-- Indian Equities -->
+        <button type="button" class="quick-chip active" data-ticker="Reliance" data-market="in">
+          <span>🇮🇳 Reliance</span>
+        </button>
+        <button type="button" class="quick-chip" data-ticker="TCS" data-market="in">
+          <span>🇮🇳 TCS</span>
+        </button>
+        <button type="button" class="quick-chip" data-ticker="HDFC Bank" data-market="in">
+          <span>🇮🇳 HDFC Bank</span>
+        </button>
+        <button type="button" class="quick-chip" data-ticker="Tata Motors" data-market="in">
+          <span>🇮🇳 Tata Motors</span>
+        </button>
+        <button type="button" class="quick-chip" data-ticker="State Bank of India" data-market="in">
+          <span>🇮🇳 SBI</span>
+        </button>
+        <button type="button" class="quick-chip" data-ticker="NIFTY 50" data-market="in">
+          <span>🇮🇳 Nifty 50</span>
+        </button>
+
+        <!-- US Equities -->
+        <button type="button" class="quick-chip" data-ticker="Apple" data-market="us">
+          <span>🇺🇸 Apple</span>
+        </button>
+        <button type="button" class="quick-chip" data-ticker="NVDA" data-market="us">
+          <span>🇺🇸 Nvidia</span>
+        </button>
+        <button type="button" class="quick-chip" data-ticker="Tesla" data-market="us">
+          <span>🇺🇸 Tesla</span>
+        </button>
+        <button type="button" class="quick-chip" data-ticker="Microsoft" data-market="us">
+          <span>🇺🇸 Microsoft</span>
+        </button>
+        <button type="button" class="quick-chip" data-ticker="S&P 500" data-market="us">
+          <span>🇺🇸 S&P 500</span>
+        </button>
       </div>
     </section>
 
     <!-- Error Banner -->
-    <div id="errorBanner" class="hidden bg-rose-500/10 border border-rose-500/30 rounded-2xl p-4 text-rose-300 flex items-start gap-3">
-      <i class="fa-solid fa-circle-exclamation text-xl text-rose-400 mt-0.5"></i>
-      <div id="errorMessage" class="text-sm"></div>
+    <div id="errorBanner" class="error-banner" style="display: none;">
+      <i class="fa-solid fa-circle-exclamation"></i>
+      <div id="errorMessage">Unable to fetch ticker data.</div>
     </div>
 
     <!-- Loading State -->
-    <div id="loadingState" class="hidden space-y-6 py-12 text-center">
-      <div class="inline-block relative">
-        <div class="w-16 h-16 rounded-full border-4 border-slate-800 border-t-emerald-400 animate-spin"></div>
-        <div class="absolute inset-0 flex items-center justify-center text-emerald-400 font-bold text-xs">AI</div>
-      </div>
-      <div class="space-y-2">
-        <h3 id="loadingText" class="text-lg font-semibold text-slate-200">Analyzing Market Data...</h3>
-        <p class="text-xs text-slate-400 max-w-md mx-auto">Computing 18 stationary technical indicators, cross-market historical pricing, and training Random Forest & Gradient Boosting ensemble models.</p>
+    <div id="loadingState" class="loading-container" style="display: none;">
+      <div class="loading-spinner"></div>
+      <div class="loading-title" id="loadingText">Retrieving Market Data & Training Models...</div>
+      <div class="loading-subtitle">
+        Analyzing stationary technical ratios, historical volatility, and running dual ensemble regressions.
       </div>
     </div>
 
-    <!-- Results Section -->
-    <div id="resultsSection" class="space-y-8 hidden">
+    <!-- Active Stock Analysis Container -->
+    <div id="resultsSection" class="results-section">
 
-      <!-- Hero Row: Core Prediction & Signals -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        <!-- Card 1: Asset & Predicted Target -->
-        <div class="lg:col-span-2 bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden backdrop-blur-xl">
-          <div class="absolute -right-16 -top-16 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none"></div>
-          
-          <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
-            <div>
-              <div class="flex items-center gap-2 mb-1">
-                <span id="tickerBadge" class="px-2.5 py-1 text-xs font-mono font-bold rounded-lg bg-slate-800 text-slate-300 border border-slate-700">RELIANCE.NS</span>
-                <span id="currencyBadge" class="px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-800/80 text-emerald-400 border border-slate-700">INR (₹)</span>
-                <span id="sectorBadge" class="px-2.5 py-1 text-xs rounded-lg bg-slate-800/50 text-slate-400">Energy</span>
-              </div>
-              <h2 id="companyName" class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">Reliance Industries Limited</h2>
+      <!-- Stock Hero Header Card -->
+      <section class="stock-hero-card">
+        <div class="hero-top-row">
+          <div class="hero-info-group">
+            <div class="meta-badges">
+              <span id="tickerBadge" class="meta-badge ticker">RELIANCE.NS</span>
+              <span id="currencyBadge" class="meta-badge currency">INR (₹)</span>
+              <span id="sectorBadge" class="meta-badge">Energy / Conglomerate</span>
             </div>
+            <h1 id="companyName" class="company-title">Reliance Industries Limited</h1>
+          </div>
+
+          <div id="signalBadge" class="signal-pill">
+            <span id="signalText">BULLISH ACCUMULATION</span>
+          </div>
+        </div>
+
+        <!-- 3-Column Core Price Strip -->
+        <div class="price-strip">
+          <div class="price-box">
+            <span class="price-label">Current Market Close</span>
+            <div class="price-value-row">
+              <span id="currentPrice" class="price-value">₹1,377.50</span>
+            </div>
+            <span class="price-caption">Last confirmed session settlement</span>
+          </div>
+
+          <div class="price-box">
+            <span class="price-label">Next Session Model Target</span>
+            <div class="price-value-row">
+              <span id="predictedPrice" class="price-value target">₹1,378.22</span>
+              <span id="returnPill" class="change-pill">
+                <i class="fa-solid fa-arrow-trend-up"></i>
+                <span id="returnText">+0.05%</span>
+              </span>
+            </div>
+            <span class="price-caption">1-Day quantitative ensemble target</span>
+          </div>
+
+          <div class="price-box">
+            <span class="price-label">5-Day Swing Projection</span>
+            <div class="price-value-row">
+              <span id="predicted5dPrice" class="price-value swing">₹1,385.00</span>
+              <span id="return5dPill" class="change-pill">
+                <span id="return5dText">+0.55%</span>
+              </span>
+            </div>
+            <span class="price-caption">Multi-day trend continuation estimate</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Institutional Tab Navigation -->
+      <nav class="tab-navigation-bar">
+        <button type="button" class="tab-btn active" data-tab="tab-chart">
+          <i class="fa-solid fa-chart-line"></i>
+          <span>Overview & Chart</span>
+        </button>
+        <button type="button" class="tab-btn" data-tab="tab-targets">
+          <i class="fa-solid fa-crosshairs"></i>
+          <span>Target Projections & Edge</span>
+        </button>
+        <button type="button" class="tab-btn" data-tab="tab-fundamentals">
+          <i class="fa-solid fa-building-columns"></i>
+          <span>Fundamentals & Valuation</span>
+        </button>
+        <button type="button" class="tab-btn" data-tab="tab-technicals">
+          <i class="fa-solid fa-sliders"></i>
+          <span>Technicals & Key Levels</span>
+        </button>
+        <button type="button" class="tab-btn" data-tab="tab-copilot">
+          <i class="fa-solid fa-comments"></i>
+          <span>Market Analyst Notes</span>
+        </button>
+      </nav>
+
+      <!-- Tab Panes Container -->
+      <div class="tab-content">
+
+        <!-- TAB 1: Chart & Overview -->
+        <div id="tab-chart" class="tab-pane active">
+          <div class="card">
+            <div class="card-header-row">
+              <div class="card-title-group">
+                <h3 class="card-title">
+                  <span>Price History & Model Trajectory</span>
+                </h3>
+                <p class="card-subtitle" id="chartSubtitle">Interactive candlestick & moving averages view</p>
+              </div>
+
+              <!-- Controls & Legend -->
+              <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+                <div class="timeframe-pill-group">
+                  <button type="button" class="timeframe-btn" data-tf="1M">1M</button>
+                  <button type="button" class="timeframe-btn" data-tf="3M">3M</button>
+                  <button type="button" class="timeframe-btn active" data-tf="6M">6M</button>
+                  <button type="button" class="timeframe-btn" data-tf="1Y">1Y</button>
+                  <button type="button" class="timeframe-btn" data-tf="ALL">ALL</button>
+                </div>
+
+                <div class="chart-legend-strip">
+                  <div class="legend-item">
+                    <span class="legend-line close"></span>
+                    <span>Close</span>
+                  </div>
+                  <div class="legend-item">
+                    <span class="legend-line sma20"></span>
+                    <span>SMA 20</span>
+                  </div>
+                  <div class="legend-item">
+                    <span class="legend-line sma50"></span>
+                    <span>SMA 50</span>
+                  </div>
+                  <div class="legend-item">
+                    <span class="legend-dot target"></span>
+                    <span>Target</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Canvas -->
+            <div class="chart-container">
+              <canvas id="priceChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: Target Projections & Edge -->
+        <div id="tab-targets" class="tab-pane">
+          <div class="card" style="display: flex; flex-direction: column; gap: 20px;">
+            <div class="card-title-group">
+              <h3 class="card-title">95% Confidence Corridor & Expected Range</h3>
+              <p class="card-subtitle">Statistical boundary calculated via 1.96× ATR from projected mean</p>
+            </div>
+
+            <!-- Corridor Box -->
+            <div class="corridor-box">
+              <div class="corridor-header">
+                <span class="corridor-title">
+                  <i class="fa-solid fa-shield-halved" style="color: var(--blue);"></i>
+                  Expected Next Session Band:
+                </span>
+                <span class="corridor-values">
+                  <span id="rangeLowerText">₹1,314.81</span>
+                  <span style="color: var(--text-muted); margin: 0 4px;">—</span>
+                  <span id="rangeUpperText">₹1,441.62</span>
+                </span>
+              </div>
+              <div class="corridor-track">
+                <div class="corridor-fill"></div>
+              </div>
+              <div class="corridor-legend">
+                <span>95% Floor (Downside Limit)</span>
+                <span>Expected Mean</span>
+                <span>95% Ceiling (Upside Limit)</span>
+              </div>
+            </div>
+
+            <!-- Model Reliability Metrics Grid -->
+            <div class="metric-grid-4">
+              <div class="metric-tile">
+                <span class="metric-tile-label">Directional Hit Rate</span>
+                <span id="hitRateText" class="metric-tile-value" style="color: var(--green);">54.1%</span>
+                <div class="meter-track">
+                  <div id="hitRateBar" class="meter-fill" style="width: 54.1%; background-color: var(--green);"></div>
+                </div>
+                <span class="metric-tile-sub">Out-of-sample directional win rate</span>
+              </div>
+
+              <div class="metric-tile">
+                <span class="metric-tile-label">Price Accuracy (MAPE)</span>
+                <span id="mapeText" class="metric-tile-value" style="color: var(--cyan);">1.04%</span>
+                <span class="metric-tile-sub">Average historical variance</span>
+              </div>
+
+              <div class="metric-tile">
+                <span class="metric-tile-label">Annualized Volatility</span>
+                <span id="volatilityText" class="metric-tile-value" style="color: var(--amber);">43.1%</span>
+                <span class="metric-tile-sub">Rolling annualized standard deviation</span>
+              </div>
+
+              <div class="metric-tile">
+                <span class="metric-tile-label">Average True Range (ATR)</span>
+                <span id="atrText" class="metric-tile-value">₹32.35</span>
+                <span class="metric-tile-sub">Daily volatility spread</span>
+              </div>
+            </div>
+
+            <!-- Ensemble Specification Strip -->
+            <div style="font-size: 11px; color: var(--text-muted); padding-top: 10px; border-top: 1px solid var(--border-subtle);">
+              Architecture: <b style="color: var(--text-secondary);">RandomForest</b> (150 estimators) combined with <b style="color: var(--text-secondary);">GradientBoosting</b> (100 estimators), trained exclusively on stationary return ratios.
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: Fundamentals & Valuation -->
+        <div id="tab-fundamentals" class="tab-pane">
+          <div class="card" style="display: flex; flex-direction: column; gap: 20px;">
+            <div class="card-title-group">
+              <h3 class="card-title">Corporate Valuation & Fundamental Profile</h3>
+              <p class="card-subtitle">Balance sheet metrics and price positioning</p>
+            </div>
+
+            <div class="metric-grid-4">
+              <div class="metric-tile">
+                <span class="metric-tile-label">Market Capitalization</span>
+                <span id="marketCapText" class="metric-tile-value">--</span>
+                <span class="metric-tile-sub">Total enterprise equity value</span>
+              </div>
+
+              <div class="metric-tile">
+                <span class="metric-tile-label">Trailing P/E Ratio</span>
+                <span id="peRatioText" class="metric-tile-value">--</span>
+                <span class="metric-tile-sub">Price to Earnings multiple</span>
+              </div>
+
+              <div class="metric-tile">
+                <span class="metric-tile-label">Beta (Systematic Risk)</span>
+                <span id="betaText" class="metric-tile-value">--</span>
+                <span class="metric-tile-sub">Sensitivity versus benchmark</span>
+              </div>
+
+              <div class="metric-tile">
+                <span class="metric-tile-label">Dividend Yield</span>
+                <span id="divYieldText" class="metric-tile-value">--</span>
+                <span class="metric-tile-sub">Annual distribution yield</span>
+              </div>
+            </div>
+
+            <!-- 52-Week Range Bar -->
+            <div class="range-bar-wrapper">
+              <div class="range-bar-labels">
+                <span>52W Low: <b id="low52Text" class="mono-num" style="color: var(--text-primary);">--</b></span>
+                <span style="font-weight: 600; color: var(--text-secondary);">52-Week Trading Range</span>
+                <span>52W High: <b id="high52Text" class="mono-num" style="color: var(--text-primary);">--</b></span>
+              </div>
+              <div class="range-bar-track">
+                <div id="range52Bar" class="range-bar-fill" style="left: 0%; width: 50%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 4: Technicals & Key Levels -->
+        <div id="tab-technicals" class="tab-pane">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
             
-            <!-- Signal Badge -->
-            <div id="signalBadge" class="px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 shadow-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span id="signalText">MODERATE BUY 🟢</span>
-            </div>
-          </div>
-
-          <!-- Price Comparison Display -->
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 rounded-xl bg-slate-950/60 border border-slate-800/80">
-            <div>
-              <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Current Market Close</p>
-              <div class="text-2xl sm:text-3xl font-extrabold font-mono text-slate-200" id="currentPrice">₹1,377.50</div>
-              <p class="text-[11px] text-slate-500 mt-1">Confirmed session close</p>
-            </div>
-
-            <div class="border-t sm:border-t-0 sm:border-l border-slate-800 pt-3 sm:pt-0 sm:pl-4">
-              <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">1-Day Next Session Target</p>
-              <div class="flex items-baseline gap-2">
-                <div class="text-2xl sm:text-3xl font-extrabold font-mono text-emerald-400" id="predictedPrice">₹1,378.22</div>
-                <div id="returnPill" class="px-2 py-0.5 rounded text-[11px] font-bold font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
-                  <i class="fa-solid fa-arrow-trend-up"></i>
-                  <span id="returnText">+0.05%</span>
-                </div>
+            <!-- Pivot Ladder Card -->
+            <div class="card">
+              <div class="card-title-group" style="margin-bottom: 12px;">
+                <h3 class="card-title">Classical Pivot Point Ladder</h3>
+                <p class="card-subtitle">Intraday support and resistance boundaries</p>
               </div>
-              <p class="text-[11px] text-slate-500 mt-1">1-Day ML predicted target</p>
+              <table class="pivot-ladder-table">
+                <thead>
+                  <tr>
+                    <th>Level</th>
+                    <th>Threshold Price</th>
+                    <th>Type</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="level-name level-r2">Resistance 2 (R2)</td>
+                    <td class="level-val level-r2" id="resistanceR2">--</td>
+                    <td style="color: var(--text-muted);">Major Ceiling</td>
+                  </tr>
+                  <tr>
+                    <td class="level-name level-r1">Resistance 1 (R1)</td>
+                    <td class="level-val level-r1" id="resistanceR1">--</td>
+                    <td style="color: var(--text-muted);">Minor Ceiling</td>
+                  </tr>
+                  <tr>
+                    <td class="level-name level-pivot">Pivot Point (PP)</td>
+                    <td class="level-val level-pivot" id="pivotPoint">--</td>
+                    <td style="color: var(--text-muted);">Equilibrium</td>
+                  </tr>
+                  <tr>
+                    <td class="level-name level-s1">Support 1 (S1)</td>
+                    <td class="level-val level-s1" id="supportS1">--</td>
+                    <td style="color: var(--text-muted);">Minor Floor</td>
+                  </tr>
+                  <tr>
+                    <td class="level-name level-s2">Support 2 (S2)</td>
+                    <td class="level-val level-s2" id="supportS2">--</td>
+                    <td style="color: var(--text-muted);">Major Floor</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
 
-            <div class="border-t sm:border-t-0 sm:border-l border-slate-800 pt-3 sm:pt-0 sm:pl-4">
-              <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">5-Day Swing Target</p>
-              <div class="flex items-baseline gap-2">
-                <div class="text-2xl sm:text-3xl font-extrabold font-mono text-cyan-400" id="predicted5dPrice">₹1,385.00</div>
-                <div id="return5dPill" class="px-2 py-0.5 rounded text-[11px] font-bold font-mono bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 flex items-center gap-1">
-                  <span id="return5dText">+0.55%</span>
-                </div>
-              </div>
-              <p class="text-[11px] text-slate-500 mt-1">5-Day projected swing target</p>
-            </div>
-          </div>
-
-          <!-- Fundamentals Bar -->
-          <div class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3 border-t border-slate-800/80 text-xs">
-            <div class="p-2.5 rounded-lg bg-slate-950/40 border border-slate-800/60">
-              <span class="text-slate-500 block text-[10px] uppercase font-semibold">Market Cap</span>
-              <span id="marketCapText" class="font-bold font-mono text-slate-200">--</span>
-            </div>
-            <div class="p-2.5 rounded-lg bg-slate-950/40 border border-slate-800/60">
-              <span class="text-slate-500 block text-[10px] uppercase font-semibold">P/E Ratio</span>
-              <span id="peRatioText" class="font-bold font-mono text-slate-200">--</span>
-            </div>
-            <div class="p-2.5 rounded-lg bg-slate-950/40 border border-slate-800/60">
-              <span class="text-slate-500 block text-[10px] uppercase font-semibold">Beta (Volatility)</span>
-              <span id="betaText" class="font-bold font-mono text-slate-200">--</span>
-            </div>
-            <div class="p-2.5 rounded-lg bg-slate-950/40 border border-slate-800/60">
-              <span class="text-slate-500 block text-[10px] uppercase font-semibold">Div Yield</span>
-              <span id="divYieldText" class="font-bold font-mono text-slate-200">--</span>
-            </div>
-          </div>
-
-          <!-- 52-Week Range Bar -->
-          <div class="mt-3 space-y-1">
-            <div class="flex justify-between items-center text-[11px]">
-              <span class="text-slate-500">52W Low: <b id="low52Text" class="font-mono text-slate-400">--</b></span>
-              <span class="text-slate-400 font-medium">52-Week Trading Range</span>
-              <span class="text-slate-500">52W High: <b id="high52Text" class="font-mono text-slate-400">--</b></span>
-            </div>
-            <div class="relative h-2 bg-slate-800 rounded-full overflow-hidden">
-              <div id="range52Bar" class="absolute inset-y-0 bg-gradient-to-r from-emerald-500 via-cyan-400 to-amber-400 rounded-full" style="left: 0%; width: 50%;"></div>
-            </div>
-          </div>
-
-          <!-- 95% Confidence Corridor Visualizer -->
-          <div class="mt-4 space-y-2 pt-3 border-t border-slate-800/80">
-            <div class="flex justify-between items-center text-xs">
-              <span class="text-slate-400 font-medium flex items-center gap-1">
-                <i class="fa-solid fa-shield-halved text-cyan-400"></i> 1-Day 95% Trading Corridor:
-              </span>
-              <span class="text-slate-300 font-mono text-xs">
-                <span id="rangeLowerText">₹1,314.81</span> ──► <span id="rangeUpperText">₹1,441.62</span>
-              </span>
-            </div>
-
-            <!-- Corridor Range Bar -->
-            <div class="relative h-3 bg-slate-800 rounded-full overflow-hidden p-0.5">
-              <div class="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-500/40 via-emerald-500/50 to-cyan-500/40 rounded-full w-full"></div>
-            </div>
-            <div class="flex justify-between text-[10px] text-slate-500">
-              <span>95% Downside Floor (1.96× ATR)</span>
-              <span>Predicted Target</span>
-              <span>95% Upside Ceiling (1.96× ATR)</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card 2: Quantitative Edge & Model Reliability -->
-        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between backdrop-blur-xl">
-          <div>
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wider">Model Validation</h3>
-              <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-slate-800 text-slate-400 border border-slate-700">Out-of-Sample</span>
-            </div>
-
-            <div class="space-y-4">
-              <!-- Directional Hit Rate -->
-              <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800/80">
-                <div class="flex justify-between items-center text-xs mb-1">
-                  <span class="text-slate-400">Directional Hit Rate (Win %)</span>
-                  <span id="hitRateText" class="font-bold font-mono text-emerald-400 text-sm">54.1%</span>
-                </div>
-                <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                  <div id="hitRateBar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full" style="width: 54.1%"></div>
-                </div>
-                <p class="text-[11px] text-slate-500 mt-1">Accuracy in calling UP vs DOWN sessions</p>
+            <!-- Momentum & Swing Extremes Card -->
+            <div class="card" style="display: flex; flex-direction: column; gap: 16px;">
+              <div class="card-title-group">
+                <h3 class="card-title">Momentum & Swing Extremes</h3>
+                <p class="card-subtitle">Oscillators and recent range boundaries</p>
               </div>
 
-              <!-- MAPE Price Error -->
-              <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800/80">
-                <div class="flex justify-between items-center text-xs mb-1">
-                  <span class="text-slate-400">Mean Absolute % Error (MAPE)</span>
-                  <span id="mapeText" class="font-bold font-mono text-cyan-400 text-sm">1.04%</span>
-                </div>
-                <p class="text-[11px] text-slate-500">Average historical price variance on test split</p>
+              <!-- RSI -->
+              <div class="metric-tile">
+                <span class="metric-tile-label">
+                  <span>Relative Strength Index (RSI 14)</span>
+                  <span id="rsiStatus" class="meta-badge">Neutral</span>
+                </span>
+                <span id="rsiValue" class="metric-tile-value">54.2</span>
+                <span class="metric-tile-sub">Oversold &lt;30 · Neutral 30-70 · Overbought &gt;70</span>
               </div>
 
-              <!-- Volatility & ATR -->
-              <div class="grid grid-cols-2 gap-2">
-                <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80">
-                  <span class="text-[11px] text-slate-400 block">Annual Volatility</span>
-                  <span id="volatilityText" class="font-bold font-mono text-amber-400 text-sm">43.1%</span>
-                </div>
-                <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80">
-                  <span class="text-[11px] text-slate-400 block">Daily ATR</span>
-                  <span id="atrText" class="font-bold font-mono text-slate-200 text-sm">₹32.35</span>
-                </div>
+              <!-- Stochastic -->
+              <div class="metric-tile">
+                <span class="metric-tile-label">
+                  <span>Stochastic Oscillator (%K / %D)</span>
+                  <span id="stochStatus" class="meta-badge">Bullish</span>
+                </span>
+                <span id="stochValue" class="metric-tile-value">72.4 / 68.1</span>
+                <span class="metric-tile-sub">Fast momentum crossover confirmation</span>
               </div>
 
-              <!-- Technical Consensus -->
-              <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800/80">
-                <div class="flex justify-between items-center text-xs mb-1">
-                  <span class="text-slate-400">Technical Consensus</span>
-                  <span id="consensusBadge" class="font-bold text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">Bullish Setup</span>
-                </div>
-                <div class="flex items-center gap-1.5 text-[11px] text-slate-400 mt-1">
-                  <span class="text-emerald-400 font-semibold"><i class="fa-solid fa-arrow-trend-up"></i> <span id="bullishCount">0</span> Buy</span>
-                  <span class="text-slate-600">|</span>
-                  <span class="text-amber-400 font-semibold"><span id="neutralCount">0</span> Neutral</span>
-                  <span class="text-slate-600">|</span>
-                  <span class="text-rose-400 font-semibold"><i class="fa-solid fa-arrow-trend-down"></i> <span id="bearishCount">0</span> Sell</span>
+              <!-- 20-Day Extremes -->
+              <div class="metric-tile">
+                <span class="metric-tile-label">20-Day Swing Extremes</span>
+                <div style="display: flex; justify-content: space-between; margin-top: 4px;">
+                  <span style="font-size: 12px; color: var(--red);">High: <b id="swingHigh20d" class="mono-num">--</b></span>
+                  <span style="font-size: 12px; color: var(--green);">Low: <b id="swingLow20d" class="mono-num">--</b></span>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div class="mt-4 pt-3 border-t border-slate-800 text-[11px] text-slate-500">
-            Ensemble: <b class="text-slate-400">RandomForest</b> (150 trees) + <b class="text-slate-400">GradientBoosting</b> (100 trees).
-          </div>
-        </div>
-      </div>
+            <!-- Consensus Card -->
+            <div class="card" style="display: flex; flex-direction: column; gap: 16px;">
+              <div class="card-title-group">
+                <h3 class="card-title">Technical Consensus</h3>
+                <p class="card-subtitle">Aggregated multi-indicator signal weight</p>
+              </div>
 
-      <!-- Interactive Chart Section -->
-      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-xl space-y-4">
-        <div class="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h3 class="text-lg font-bold text-white flex items-center gap-2">
-              <i class="fa-solid fa-chart-area text-emerald-400"></i>
-              Interactive Price & Prediction Chart
-            </h3>
-            <p class="text-xs text-slate-400" id="chartSubtitle">Multi-Timeframe Trend with Moving Averages & Volume</p>
-          </div>
-
-          <!-- Timeframe Selector & Legend -->
-          <div class="flex flex-wrap items-center gap-3">
-            <!-- Timeframe Pills -->
-            <div class="flex items-center bg-slate-950/80 p-1 rounded-xl border border-slate-800 text-xs">
-              <button class="timeframe-btn px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition font-medium" data-tf="1M">1M</button>
-              <button class="timeframe-btn px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition font-medium" data-tf="3M">3M</button>
-              <button class="timeframe-btn px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/40" data-tf="6M">6M</button>
-              <button class="timeframe-btn px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition font-medium" data-tf="1Y">1Y</button>
-              <button class="timeframe-btn px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition font-medium" data-tf="ALL">ALL</button>
+              <div class="metric-tile">
+                <span class="metric-tile-label">Consensus Stance</span>
+                <span id="consensusBadge" class="metric-tile-value" style="font-size: 16px; color: var(--green);">Bullish Setup</span>
+                <div style="display: flex; gap: 12px; margin-top: 8px; font-size: 12px;">
+                  <span style="color: var(--green); font-weight: 600;"><span id="bullishCount">0</span> Buy</span>
+                  <span style="color: var(--amber); font-weight: 600;"><span id="neutralCount">0</span> Neutral</span>
+                  <span style="color: var(--red); font-weight: 600;"><span id="bearishCount">0</span> Sell</span>
+                </div>
+              </div>
             </div>
 
-            <!-- Chart Legend Pills -->
-            <div class="flex items-center gap-2.5 text-xs">
-              <span class="flex items-center gap-1.5 text-slate-300">
-                <span class="w-3 h-0.5 bg-emerald-400 inline-block"></span> Close
-              </span>
-              <span class="flex items-center gap-1.5 text-slate-300">
-                <span class="w-3 h-0.5 bg-amber-400 inline-block"></span> SMA 20
-              </span>
-              <span class="flex items-center gap-1.5 text-slate-300">
-                <span class="w-3 h-0.5 bg-purple-400 inline-block"></span> SMA 50
-              </span>
-              <span class="flex items-center gap-1.5 text-slate-300">
-                <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 inline-block animate-ping"></span> Target
-              </span>
+          </div>
+        </div>
+
+        <!-- TAB 5: Market Notes & Copilot -->
+        <div id="tab-copilot" class="tab-pane">
+          <div class="card chat-container">
+            <div class="card-header-row" style="margin-bottom: 0;">
+              <div class="card-title-group">
+                <h3 class="card-title">
+                  <i class="fa-solid fa-pen-to-square" style="color: var(--blue);"></i>
+                  <span>Market Desk Research Copilot</span>
+                </h3>
+                <p class="card-subtitle">Inquire about target reasoning, risk parameters, or valuation nuances</p>
+              </div>
             </div>
-          </div>
-        </div>
 
-        <!-- Canvas Container -->
-        <div class="relative w-full h-[360px] sm:h-[420px]">
-          <canvas id="priceChart"></canvas>
-        </div>
-      </div>
-
-      <!-- Technical Indicators Deep Dive Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        
-        <!-- RSI Card -->
-        <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 backdrop-blur-xl space-y-2">
-          <div class="flex justify-between items-center text-xs text-slate-400 font-semibold uppercase">
-            <span>RSI (14-Day)</span>
-            <i class="fa-solid fa-gauge-high text-slate-500"></i>
-          </div>
-          <div class="flex items-baseline gap-2">
-            <div id="rsiValue" class="text-2xl font-black font-mono text-slate-100">54.2</div>
-            <span id="rsiStatus" class="text-xs font-semibold px-2 py-0.5 rounded bg-slate-800 text-slate-300">Neutral</span>
-          </div>
-          <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden flex">
-            <div class="bg-emerald-500/50 w-[30%]"></div>
-            <div class="bg-slate-600/50 w-[40%]"></div>
-            <div class="bg-rose-500/50 w-[30%]"></div>
-          </div>
-          <div class="flex justify-between text-[10px] text-slate-500">
-            <span>Oversold &lt;30</span>
-            <span>Neutral 30-70</span>
-            <span>Overbought &gt;70</span>
-          </div>
-        </div>
-
-        <!-- Stochastic Oscillator Card -->
-        <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 backdrop-blur-xl space-y-2">
-          <div class="flex justify-between items-center text-xs text-slate-400 font-semibold uppercase">
-            <span>Stochastic (%K / %D)</span>
-            <i class="fa-solid fa-sliders text-slate-500"></i>
-          </div>
-          <div class="flex items-baseline gap-2">
-            <div id="stochValue" class="text-2xl font-black font-mono text-slate-100">72.4 / 68.1</div>
-            <span id="stochStatus" class="text-xs font-semibold px-2 py-0.5 rounded bg-slate-800 text-slate-300">Bullish</span>
-          </div>
-          <p class="text-[11px] text-slate-500">Fast momentum crossover indicator</p>
-        </div>
-
-        <!-- Pivot Point Ladder Card -->
-        <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 backdrop-blur-xl space-y-1.5">
-          <div class="flex justify-between items-center text-xs text-slate-400 font-semibold uppercase">
-            <span>Pivot Point Ladder</span>
-            <i class="fa-solid fa-arrows-up-down text-slate-500"></i>
-          </div>
-          <div class="grid grid-cols-2 gap-x-2 text-[11px] font-mono">
-            <span class="text-rose-400">R2: <span id="resistanceR2">--</span></span>
-            <span class="text-emerald-400">S2: <span id="supportS2">--</span></span>
-            <span class="text-rose-300">R1: <span id="resistanceR1">--</span></span>
-            <span class="text-emerald-300">S1: <span id="supportS1">--</span></span>
-          </div>
-          <div class="text-[11px] text-slate-400 pt-1 border-t border-slate-800">
-            Pivot: <span id="pivotPoint" class="font-mono text-slate-200">--</span>
-          </div>
-        </div>
-
-        <!-- 20-Day Swing Extremes -->
-        <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 backdrop-blur-xl space-y-2">
-          <div class="flex justify-between items-center text-xs text-slate-400 font-semibold uppercase">
-            <span>20-Day Swing Extremes</span>
-            <i class="fa-solid fa-chart-line text-slate-500"></i>
-          </div>
-          <div class="space-y-1 text-xs">
-            <div class="flex justify-between text-slate-300">
-              <span class="text-rose-400">20D High:</span>
-              <span id="swingHigh20d" class="font-mono font-bold">--</span>
+            <!-- Chat History -->
+            <div id="chatHistory" class="chat-history">
+              <div class="chat-message assistant">
+                <div class="chat-bubble">
+                  <span class="chat-sender">Market Desk Analyst</span>
+                  Quantitative models and stationary feature matrices have been generated for this asset. Select an inquiry below or type a custom question to review support levels, model rationale, or valuation comparisons.
+                </div>
+              </div>
             </div>
-            <div class="flex justify-between text-slate-300">
-              <span class="text-emerald-400">20D Low:</span>
-              <span id="swingLow20d" class="font-mono font-bold">--</span>
-            </div>
-          </div>
-          <p class="text-[10px] text-slate-500">Key breakout & breakdown levels</p>
-        </div>
-      </div>
 
-      <!-- AI Conversational Analyst Drawer -->
-      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-xl space-y-4">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
-              <i class="fa-solid fa-robot"></i>
+            <!-- Quick Question Chips -->
+            <div class="chat-prompts-row">
+              <button type="button" class="chat-prompt-btn">What is my recommended Stop-Loss?</button>
+              <button type="button" class="chat-prompt-btn">Explain the 5-day swing target</button>
+              <button type="button" class="chat-prompt-btn">Analyze valuation & P/E ratio</button>
+              <button type="button" class="chat-prompt-btn">Show Support & Resistance ladder</button>
+              <button type="button" class="chat-prompt-btn">Explain the 95% confidence corridor</button>
+              <button type="button" class="chat-prompt-btn">Can stock prices be predicted with 100% certainty?</button>
             </div>
-            <div>
-              <h3 class="text-sm font-bold text-white">AI Financial Analyst Assistant</h3>
-              <p class="text-xs text-slate-400">Ask questions regarding this forecast, stop-loss levels, or market signals.</p>
-            </div>
-          </div>
-          <span class="text-[11px] text-slate-500">Powered by Gemini / Quant Core</span>
-        </div>
 
-        <!-- Chat History Window -->
-        <div id="chatHistory" class="space-y-3 max-h-64 overflow-y-auto pr-2 text-sm">
-          <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3 text-slate-300">
-            <span class="text-emerald-400 font-bold text-xs block mb-1">AI Analyst:</span>
-            Hello! I have generated the quantitative analysis for this asset. Ask me questions like <i>"What is the recommended stop loss?"</i>, <i>"Why is the signal bullish?"</i>, or <i>"Explain the 95% confidence corridor"</i>.
+            <!-- Input Form -->
+            <form id="chatForm" class="chat-input-row">
+              <input 
+                type="text" 
+                id="chatInput" 
+                class="chat-input" 
+                placeholder="Ask the market desk analyst about this asset..."
+                autocomplete="off"
+              >
+              <button type="submit" class="chat-submit-btn">
+                <span>Send</span>
+              </button>
+            </form>
           </div>
         </div>
 
-        <!-- Quick Question Suggestions -->
-        <div class="flex flex-wrap items-center gap-2 text-xs">
-          <button class="chat-prompt-btn px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
-            What is my recommended Stop-Loss?
-          </button>
-          <button class="chat-prompt-btn px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
-            What is the 5-day swing target?
-          </button>
-          <button class="chat-prompt-btn px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
-            Analyze valuation & P/E ratio
-          </button>
-          <button class="chat-prompt-btn px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
-            Show Support & Resistance ladder
-          </button>
-          <button class="chat-prompt-btn px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
-            Explain the 95% Confidence Corridor
-          </button>
-          <button class="chat-prompt-btn px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
-            Can this predict 100% accurately?
-          </button>
-        </div>
-
-        <!-- Chat Input Form -->
-        <form id="chatForm" class="flex gap-2">
-          <input 
-            type="text" 
-            id="chatInput" 
-            placeholder="Ask the AI Analyst about this forecast..." 
-            class="flex-1 bg-slate-950/80 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
-          >
-          <button 
-            type="submit" 
-            class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-sm transition active:scale-95 cursor-pointer"
-          >
-            Send
-          </button>
-        </form>
       </div>
 
     </div>
 
-    <!-- Educational & Mathematical Reality Footer Banner -->
-    <footer class="mt-12 p-6 rounded-2xl bg-slate-900/50 border border-slate-800/80 text-xs text-slate-400 space-y-2">
-      <div class="flex items-center gap-2 text-amber-400 font-bold text-sm">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        <span>Mathematical Reality & Risk Disclosure</span>
+    <!-- Institutional Market Reality Disclosure Footer -->
+    <footer class="app-footer">
+      <div class="footer-disclosure-title">
+        <i class="fa-solid fa-shield" style="color: var(--amber);"></i>
+        <span>Market Mechanics & Quantitative Model Disclosure</span>
       </div>
-      <p class="leading-relaxed">
-        Under the <b>Efficient Market Hypothesis</b> and <b>Random Walk Theory</b>, future stock price movements are stochastic processes influenced by unforeseen catalysts (earnings surprises, central bank policy shifts, geopolitical headlines, and order flow). No algorithm can achieve 100% certainty. Quantitative trading systems focus on statistical expected value, out-of-sample directional edges (55%–65% win rates), and strict asymmetric risk management.
+      <p>
+        Under the Efficient Market Hypothesis and Random Walk dynamics, financial asset price trajectories reflect stochastic continuous-time processes driven by non-deterministic order flows, macro catalysts, and earnings revisions. Quantitative algorithms identify statistical anomalies and out-of-sample directional probabilities (typically 53%–65%), not deterministic guarantees. Strict stop-loss management and capital preservation discipline are essential.
       </p>
-      <p class="text-slate-500 text-[11px] pt-1 border-t border-slate-800/60">
-        QuantPulse AI is an algorithmic research and educational platform. It does not provide financial or trading advice.
-      </p>
+      <div style="font-size: 11px; color: var(--text-muted); border-top: 1px solid var(--border-subtle); padding-top: 8px;">
+        MarketPulse Terminal is designed strictly for financial market research, quantitative analysis, and educational simulation. It does not constitute investment advice.
+      </div>
     </footer>
 
   </main>
 
-  <!-- App Script -->
-  <script src="/static/app.js"></script>
+</div>
+
+<!-- Application Logic -->
+<script src="/static/app.js"></script>
 </body>
 </html>

@@ -1,5 +1,6 @@
 /**
- * QuantPulse AI - Advanced Multi-Timeframe Application Logic
+ * MarketPulse Terminal — Application Logic
+ * Institutional Multi-Timeframe Quantitative Analytics
  */
 
 let activeStockData = null;
@@ -28,7 +29,7 @@ const companyName = document.getElementById("companyName");
 const signalBadge = document.getElementById("signalBadge");
 const signalText = document.getElementById("signalText");
 
-// Price Cards
+// Price Elements
 const currentPriceEl = document.getElementById("currentPrice");
 const predictedPriceEl = document.getElementById("predictedPrice");
 const returnPill = document.getElementById("returnPill");
@@ -86,7 +87,10 @@ const chatInput = document.getElementById("chatInput");
 document.addEventListener("DOMContentLoaded", () => {
   fetchSystemStatus();
   setupEventListeners();
-  // Default to Reliance Industries (NSE)
+  setupTabNavigation();
+  setupKeyboardShortcuts();
+
+  // Default to Reliance Industries (NSE) on boot
   analyzeStock("Reliance", "in");
 });
 
@@ -98,14 +102,57 @@ async function fetchSystemStatus() {
     const res = await fetch("/api/status");
     const data = await res.json();
     const statusText = document.getElementById("aiStatusText");
-    if (data.gemini_connected) {
-      statusText.textContent = "Gemini AI Connected";
-    } else {
-      statusText.textContent = "Local Quant Ensemble";
+    if (statusText) {
+      if (data.gemini_connected) {
+        statusText.textContent = "Gemini Analyst Online";
+      } else {
+        statusText.textContent = "Ensemble Engine Active";
+      }
     }
   } catch (err) {
     console.warn("Status check failed", err);
   }
+}
+
+/**
+ * Setup Tab Navigation
+ */
+function setupTabNavigation() {
+  const tabButtons = document.querySelectorAll(".tab-btn");
+  const tabPanes = document.querySelectorAll(".tab-pane");
+
+  tabButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      tabButtons.forEach((b) => b.classList.remove("active"));
+      tabPanes.forEach((p) => p.classList.remove("active"));
+
+      btn.classList.add("active");
+      const targetId = btn.getAttribute("data-tab");
+      const targetPane = document.getElementById(targetId);
+      if (targetPane) {
+        targetPane.classList.add("active");
+      }
+
+      // Re-trigger chart layout if switching to chart tab
+      if (targetId === "tab-chart" && priceChartInstance) {
+        priceChartInstance.resize();
+      }
+    });
+  });
+}
+
+/**
+ * Setup Global Keyboard Shortcuts
+ */
+function setupKeyboardShortcuts() {
+  document.addEventListener("keydown", (e) => {
+    // Pressing '/' focuses search unless already typing in an input
+    if (e.key === "/" && document.activeElement !== tickerInput && document.activeElement !== chatInput) {
+      e.preventDefault();
+      tickerInput.focus();
+      tickerInput.select();
+    }
+  });
 }
 
 /**
@@ -122,9 +169,12 @@ function setupEventListeners() {
     }
   });
 
-  // Quick Chips
+  // Watchlist Quick Chips
   document.querySelectorAll(".quick-chip").forEach((chip) => {
     chip.addEventListener("click", () => {
+      document.querySelectorAll(".quick-chip").forEach((c) => c.classList.remove("active"));
+      chip.classList.add("active");
+
       const ticker = chip.getAttribute("data-ticker");
       const market = chip.getAttribute("data-market") || marketFilter.value;
       if (market) marketFilter.value = market;
@@ -136,10 +186,8 @@ function setupEventListeners() {
   // Timeframe buttons
   document.querySelectorAll(".timeframe-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
-      document.querySelectorAll(".timeframe-btn").forEach((b) => {
-        b.className = "timeframe-btn px-2.5 py-1 rounded-lg text-slate-400 hover:text-white transition font-medium";
-      });
-      btn.className = "timeframe-btn px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/40";
+      document.querySelectorAll(".timeframe-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
       currentTimeframe = btn.getAttribute("data-tf");
       if (fullChartData && activeStockData) {
         renderFilteredChart(fullChartData, activeStockData.currency_sym || "$", currentTimeframe);
@@ -206,13 +254,13 @@ function renderSuggestions(list) {
   suggestionsDropdown.innerHTML = "";
   list.forEach((item) => {
     const div = document.createElement("div");
-    div.className = "suggestion-item flex items-center justify-between text-xs";
+    div.className = "suggestion-item";
     div.innerHTML = `
-      <div>
-        <span class="font-bold text-slate-100">${escapeHtml(item.name)}</span>
-        <span class="font-mono text-slate-400 ml-1">(${escapeHtml(item.symbol)})</span>
+      <div class="suggestion-left">
+        <span class="suggestion-ticker">${escapeHtml(item.symbol)}</span>
+        <span class="suggestion-name">${escapeHtml(item.name)}</span>
       </div>
-      <span class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400">${escapeHtml(item.market)}</span>
+      <span class="suggestion-badge">${escapeHtml(item.market)}</span>
     `;
     div.addEventListener("click", () => {
       tickerInput.value = item.name;
@@ -223,11 +271,11 @@ function renderSuggestions(list) {
     });
     suggestionsDropdown.appendChild(div);
   });
-  suggestionsDropdown.classList.remove("hidden");
+  suggestionsDropdown.style.display = "flex";
 }
 
 function hideSuggestions() {
-  suggestionsDropdown.classList.add("hidden");
+  suggestionsDropdown.style.display = "none";
 }
 
 /**
@@ -245,7 +293,7 @@ async function analyzeStock(query, market = null) {
     const result = await res.json();
 
     if (!res.ok || !result.success) {
-      showError(result.error || `Unable to analyze stock "${query}". Please verify the symbol.`);
+      showError(result.error || `Unable to analyze stock "${query}". Please verify the symbol or company name.`);
       hideLoading();
       return;
     }
@@ -254,7 +302,7 @@ async function analyzeStock(query, market = null) {
     fullChartData = activeStockData.chart_data;
     renderStockData(activeStockData);
     hideLoading();
-    resultsSection.classList.remove("hidden");
+    resultsSection.style.display = "flex";
 
   } catch (err) {
     showError("A network error occurred while connecting to the quantitative backend. Please check server status.");
@@ -270,49 +318,52 @@ function renderStockData(data) {
   const isUp = data.predicted_return_pct >= 0;
   const is5dUp = (data.predicted_5d_return_pct || 0) >= 0;
 
-  // Header tags
+  // Header meta tags
   tickerBadge.textContent = data.ticker;
   currencyBadge.textContent = `${data.currency_code} (${cs})`;
-  sectorBadge.textContent = `${data.sector} • ${data.industry}`;
+  sectorBadge.textContent = `${data.sector || "Equity"} • ${data.industry || "General"}`;
   companyName.textContent = data.company_name;
 
   // Signal Badge
-  signalText.textContent = data.signal;
+  signalText.textContent = data.signal.replace(/🟢|🔴|🟡/g, "").trim();
+  signalBadge.className = "signal-pill";
   if (data.signal.includes("BUY")) {
-    signalBadge.className = "px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 shadow-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40";
+    signalBadge.classList.remove("bearish", "neutral");
   } else if (data.signal.includes("SELL")) {
-    signalBadge.className = "px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 shadow-lg bg-rose-500/20 text-rose-300 border border-rose-500/40";
+    signalBadge.classList.add("bearish");
   } else {
-    signalBadge.className = "px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 shadow-lg bg-amber-500/20 text-amber-300 border border-amber-500/40";
+    signalBadge.classList.add("neutral");
   }
 
-  // Prices (1-Day)
+  // Prices (1-Day Model Target)
   currentPriceEl.textContent = `${cs}${formatNumber(data.current_price)}`;
   predictedPriceEl.textContent = `${cs}${formatNumber(data.predicted_price)}`;
 
   const sign = isUp ? "+" : "";
   returnText.textContent = `${sign}${data.predicted_return_pct.toFixed(2)}%`;
   if (isUp) {
-    returnPill.className = "px-2 py-0.5 rounded text-[11px] font-bold font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1";
+    returnPill.className = "change-pill";
     returnPill.innerHTML = `<i class="fa-solid fa-arrow-trend-up"></i> <span>+${data.predicted_return_pct.toFixed(2)}%</span>`;
-    predictedPriceEl.className = "text-2xl sm:text-3xl font-extrabold font-mono text-emerald-400";
+    predictedPriceEl.style.color = "var(--green)";
   } else {
-    returnPill.className = "px-2 py-0.5 rounded text-[11px] font-bold font-mono bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center gap-1";
+    returnPill.className = "change-pill negative";
     returnPill.innerHTML = `<i class="fa-solid fa-arrow-trend-down"></i> <span>${data.predicted_return_pct.toFixed(2)}%</span>`;
-    predictedPriceEl.className = "text-2xl sm:text-3xl font-extrabold font-mono text-rose-400";
+    predictedPriceEl.style.color = "var(--red)";
   }
 
-  // Prices (5-Day Swing)
+  // Prices (5-Day Swing Target)
   if (data.predicted_5d_price) {
     predicted5dPriceEl.textContent = `${cs}${formatNumber(data.predicted_5d_price)}`;
     const sign5d = is5dUp ? "+" : "";
     return5dText.textContent = `${sign5d}${data.predicted_5d_return_pct.toFixed(2)}%`;
     if (is5dUp) {
-      return5dPill.className = "px-2 py-0.5 rounded text-[11px] font-bold font-mono bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 flex items-center gap-1";
-      predicted5dPriceEl.className = "text-2xl sm:text-3xl font-extrabold font-mono text-cyan-400";
+      return5dPill.className = "change-pill";
+      return5dPill.innerHTML = `<span>+${data.predicted_5d_return_pct.toFixed(2)}%</span>`;
+      predicted5dPriceEl.style.color = "var(--cyan)";
     } else {
-      return5dPill.className = "px-2 py-0.5 rounded text-[11px] font-bold font-mono bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center gap-1";
-      predicted5dPriceEl.className = "text-2xl sm:text-3xl font-extrabold font-mono text-rose-400";
+      return5dPill.className = "change-pill negative";
+      return5dPill.innerHTML = `<span>${data.predicted_5d_return_pct.toFixed(2)}%</span>`;
+      predicted5dPriceEl.style.color = "var(--red)";
     }
   }
 
@@ -329,6 +380,7 @@ function renderStockData(data) {
     high52Text.textContent = `${cs}${formatNumber(high52)}`;
     low52Text.textContent = `${cs}${formatNumber(low52)}`;
     const rangePct = Math.max(0, Math.min(100, ((data.current_price - low52) / (high52 - low52)) * 100));
+    range52Bar.style.left = "0%";
     range52Bar.style.width = `${rangePct}%`;
   } else {
     high52Text.textContent = "--";
@@ -336,11 +388,11 @@ function renderStockData(data) {
     range52Bar.style.width = "50%";
   }
 
-  // Corridor (1-Day)
+  // Corridor (1-Day 95% Confidence Band)
   rangeLowerText.textContent = `${cs}${formatNumber(data.confidence_range_lower)}`;
   rangeUpperText.textContent = `${cs}${formatNumber(data.confidence_range_upper)}`;
 
-  // Quantitative Edge
+  // Quantitative Edge & Validation
   hitRateText.textContent = `${data.directional_hit_rate.toFixed(1)}%`;
   hitRateBar.style.width = `${Math.min(100, Math.max(10, data.directional_hit_rate))}%`;
   mapeText.textContent = `${data.mape.toFixed(2)}%`;
@@ -355,50 +407,50 @@ function renderStockData(data) {
   const score = (data.bullish_count || 0) - (data.bearish_count || 0);
   if (score >= 3) {
     consensusBadge.textContent = "Strong Bullish";
-    consensusBadge.className = "font-bold text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300";
+    consensusBadge.style.color = "var(--green)";
   } else if (score >= 1) {
     consensusBadge.textContent = "Bullish Setup";
-    consensusBadge.className = "font-bold text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400";
+    consensusBadge.style.color = "var(--green)";
   } else if (score <= -3) {
     consensusBadge.textContent = "Strong Bearish";
-    consensusBadge.className = "font-bold text-xs px-2 py-0.5 rounded bg-rose-500/20 text-rose-300";
+    consensusBadge.style.color = "var(--red)";
   } else if (score <= -1) {
     consensusBadge.textContent = "Bearish Setup";
-    consensusBadge.className = "font-bold text-xs px-2 py-0.5 rounded bg-rose-500/20 text-rose-400";
+    consensusBadge.style.color = "var(--red)";
   } else {
-    consensusBadge.textContent = "Neutral / Mixed";
-    consensusBadge.className = "font-bold text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-300";
+    consensusBadge.textContent = "Neutral / Consolidation";
+    consensusBadge.style.color = "var(--amber)";
   }
 
-  // Technical Indicators (RSI)
+  // Technical Indicators: RSI
   rsiValue.textContent = data.rsi.toFixed(1);
   if (data.rsi < 30) {
     rsiStatus.textContent = "Oversold";
-    rsiStatus.className = "text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300";
+    rsiStatus.style.color = "var(--green)";
   } else if (data.rsi > 70) {
     rsiStatus.textContent = "Overbought";
-    rsiStatus.className = "text-xs font-semibold px-2 py-0.5 rounded bg-rose-500/20 text-rose-300";
+    rsiStatus.style.color = "var(--red)";
   } else {
     rsiStatus.textContent = "Neutral";
-    rsiStatus.className = "text-xs font-semibold px-2 py-0.5 rounded bg-slate-800 text-slate-300";
+    rsiStatus.style.color = "var(--text-secondary)";
   }
 
-  // Stochastic
+  // Stochastic Oscillator
   if (data.stoch_k !== undefined && data.stoch_d !== undefined) {
     stochValue.textContent = `${data.stoch_k.toFixed(1)} / ${data.stoch_d.toFixed(1)}`;
     if (data.stoch_k > data.stoch_d && data.stoch_k < 80) {
       stochStatus.textContent = "Bullish Cross";
-      stochStatus.className = "text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300";
+      stochStatus.style.color = "var(--green)";
     } else if (data.stoch_k < data.stoch_d && data.stoch_k > 20) {
       stochStatus.textContent = "Bearish Cross";
-      stochStatus.className = "text-xs font-semibold px-2 py-0.5 rounded bg-rose-500/20 text-rose-300";
+      stochStatus.style.color = "var(--red)";
     } else {
       stochStatus.textContent = "Neutral";
-      stochStatus.className = "text-xs font-semibold px-2 py-0.5 rounded bg-slate-800 text-slate-300";
+      stochStatus.style.color = "var(--text-secondary)";
     }
   }
 
-  // Pivot Ladder
+  // Pivot Point Ladder
   pivotPoint.textContent = `${cs}${formatNumber(data.pivot || data.current_price)}`;
   resistanceR1.textContent = `${cs}${formatNumber(data.resistance_r1)}`;
   resistanceR2.textContent = `${cs}${formatNumber(data.resistance_r2 || (data.resistance_r1 * 1.02))}`;
@@ -434,34 +486,36 @@ function renderFilteredChart(chartData, currencySym, timeframe) {
   const sma50 = [...chartData.sma50.slice(startIdx), null];
   const volume = [...chartData.volume.slice(startIdx), null];
 
-  // Target Point
+  // Target Point Projection
   const targetData = new Array(dates.length).fill(null);
-  targetData[dates.length - 2] = chartData.prices[totalLen - 1]; // connect anchor
-  targetData[dates.length - 1] = chartData.predicted_price; // next close point
+  targetData[dates.length - 2] = chartData.prices[totalLen - 1]; // Anchor to last close
+  targetData[dates.length - 1] = chartData.predicted_price; // Next close projection
 
   renderChart(dates, histPrices, sma20, sma50, targetData, volume, currencySym);
 }
 
 /**
- * Render Chart.js Chart with Volume Sub-chart
+ * Render Chart.js Chart
  */
 function renderChart(dates, histPrices, sma20, sma50, targetData, volume, currencySym) {
-  const ctx = document.getElementById("priceChart").getContext("2d");
+  const canvas = document.getElementById("priceChart");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
 
   if (priceChartInstance) {
     priceChartInstance.destroy();
   }
 
-  // Volume bar colors: green for up sessions, red for down sessions
+  // Volume Bar Colors: Green for up sessions, Red for down sessions
   const volumeColors = [];
   for (let i = 0; i < histPrices.length - 1; i++) {
     if (i === 0 || histPrices[i] >= histPrices[i - 1]) {
-      volumeColors.push("rgba(16, 185, 129, 0.25)");
+      volumeColors.push("rgba(16, 185, 129, 0.22)");
     } else {
-      volumeColors.push("rgba(244, 63, 94, 0.25)");
+      volumeColors.push("rgba(244, 63, 94, 0.22)");
     }
   }
-  volumeColors.push("rgba(6, 182, 212, 0.25)");
+  volumeColors.push("rgba(6, 182, 212, 0.22)");
 
   priceChartInstance = new Chart(ctx, {
     data: {
@@ -472,14 +526,14 @@ function renderChart(dates, histPrices, sma20, sma50, targetData, volume, curren
           label: "Close Price",
           data: histPrices,
           borderColor: "#10b981",
-          backgroundColor: "rgba(16, 185, 129, 0.06)",
+          backgroundColor: "rgba(16, 185, 129, 0.05)",
           borderWidth: 2,
           fill: true,
           tension: 0.1,
           pointRadius: 0,
-          pointHoverRadius: 6,
+          pointHoverRadius: 5,
           pointHoverBackgroundColor: "#10b981",
-          pointHoverBorderColor: "#fff",
+          pointHoverBorderColor: "#ffffff",
           yAxisID: "y",
         },
         {
@@ -498,7 +552,7 @@ function renderChart(dates, histPrices, sma20, sma50, targetData, volume, curren
           type: "line",
           label: "SMA 50",
           data: sma50,
-          borderColor: "#a855f7",
+          borderColor: "#8b5cf6",
           borderWidth: 1.5,
           borderDash: [6, 4],
           fill: false,
@@ -508,16 +562,15 @@ function renderChart(dates, histPrices, sma20, sma50, targetData, volume, curren
         },
         {
           type: "line",
-          label: "Next Target",
+          label: "Model Target",
           data: targetData,
           borderColor: "#06b6d4",
-          backgroundColor: "rgba(6, 182, 212, 0.2)",
-          borderWidth: 2.5,
+          borderWidth: 2,
           borderDash: [3, 3],
           fill: false,
           pointRadius: (ctx) => (ctx.dataIndex === dates.length - 1 ? 6 : 0),
           pointBackgroundColor: "#06b6d4",
-          pointBorderColor: "#fff",
+          pointBorderColor: "#ffffff",
           pointBorderWidth: 2,
           yAxisID: "y",
         },
@@ -542,12 +595,14 @@ function renderChart(dates, histPrices, sma20, sma50, targetData, volume, curren
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: "rgba(15, 23, 42, 0.95)",
+          backgroundColor: "rgba(18, 21, 30, 0.95)",
           titleColor: "#f8fafc",
-          bodyColor: "#cbd5e1",
-          borderColor: "#334155",
+          bodyColor: "#94a3b8",
+          borderColor: "rgba(255, 255, 255, 0.12)",
           borderWidth: 1,
-          padding: 12,
+          padding: 10,
+          titleFont: { family: "'Plus Jakarta Sans', sans-serif", size: 12, weight: "bold" },
+          bodyFont: { family: "'JetBrains Mono', monospace", size: 12 },
           callbacks: {
             label: function (context) {
               const val = context.raw;
@@ -562,15 +617,15 @@ function renderChart(dates, histPrices, sma20, sma50, targetData, volume, curren
       },
       scales: {
         x: {
-          grid: { color: "rgba(51, 65, 85, 0.25)" },
-          ticks: { color: "#64748b", font: { size: 10 }, maxTicksLimit: 10 }
+          grid: { color: "rgba(255, 255, 255, 0.05)" },
+          ticks: { color: "#64748b", font: { size: 11, family: "'JetBrains Mono', monospace" }, maxTicksLimit: 8 }
         },
         y: {
           position: "right",
-          grid: { color: "rgba(51, 65, 85, 0.25)" },
+          grid: { color: "rgba(255, 255, 255, 0.05)" },
           ticks: {
             color: "#94a3b8",
-            font: { size: 11, family: "JetBrains Mono" },
+            font: { size: 11, family: "'JetBrains Mono', monospace" },
             callback: (val) => `${currencySym}${formatNumber(val)}`
           }
         },
@@ -588,11 +643,11 @@ function renderChart(dates, histPrices, sma20, sma50, targetData, volume, curren
 }
 
 /**
- * AI Chat Interaction
+ * Analyst Chat Interaction
  */
 async function sendMessage(msg) {
   appendChatMessage(msg, "user");
-  const tempAiId = appendChatMessage("Analyzing quantitative metrics...", "ai", true);
+  const tempMsgId = appendChatMessage("Reviewing quantitative matrices and order levels...", "assistant", true);
 
   try {
     const res = await fetch("/api/chat", {
@@ -604,26 +659,32 @@ async function sendMessage(msg) {
       })
     });
     const data = await res.json();
-    updateChatMessage(tempAiId, data.reply || "No response received.");
+    updateChatMessage(tempMsgId, data.reply || "No response received.");
   } catch (err) {
-    updateChatMessage(tempAiId, "Could not connect to the analyst backend.");
+    updateChatMessage(tempMsgId, "Unable to connect to the quantitative analyst service.");
   }
 }
 
-function appendChatMessage(text, sender, isPending = false) {
+function appendChatMessage(text, role, isPending = false) {
   const id = "msg-" + Date.now() + Math.random().toString(36).substring(2, 6);
-  const bubble = document.createElement("div");
+  const wrapper = document.createElement("div");
+  wrapper.className = `chat-message ${role}`;
 
-  if (sender === "user") {
-    bubble.className = "chat-bubble-user p-3 text-slate-100 text-xs sm:text-sm";
-    bubble.innerHTML = `<span class="text-cyan-400 font-bold text-xs block mb-1">You:</span> ${escapeHtml(text)}`;
+  const bubble = document.createElement("div");
+  bubble.className = "chat-bubble";
+  bubble.id = id;
+
+  if (role === "user") {
+    bubble.innerHTML = escapeHtml(text);
   } else {
-    bubble.id = id;
-    bubble.className = "chat-bubble-ai p-3 text-slate-200 text-xs sm:text-sm";
-    bubble.innerHTML = `<span class="text-emerald-400 font-bold text-xs block mb-1">AI Analyst:</span> ${isPending ? `<i class="fa-solid fa-spinner fa-spin text-emerald-400"></i> ${escapeHtml(text)}` : formatMarkdown(text)}`;
+    bubble.innerHTML = `
+      <span class="chat-sender">Market Desk Analyst</span>
+      ${isPending ? `<i class="fa-solid fa-spinner fa-spin" style="color: var(--blue); margin-right: 6px;"></i> ${escapeHtml(text)}` : formatMarkdown(text)}
+    `;
   }
 
-  chatHistory.appendChild(bubble);
+  wrapper.appendChild(bubble);
+  chatHistory.appendChild(wrapper);
   chatHistory.scrollTop = chatHistory.scrollHeight;
   return id;
 }
@@ -631,36 +692,42 @@ function appendChatMessage(text, sender, isPending = false) {
 function updateChatMessage(id, newText) {
   const el = document.getElementById(id);
   if (el) {
-    el.innerHTML = `<span class="text-emerald-400 font-bold text-xs block mb-1">AI Analyst:</span> ${formatMarkdown(newText)}`;
+    el.innerHTML = `
+      <span class="chat-sender">Market Desk Analyst</span>
+      ${formatMarkdown(newText)}
+    `;
     chatHistory.scrollTop = chatHistory.scrollHeight;
   }
 }
 
 /**
- * Helpers
+ * Loading & Error Helpers
  */
 function showLoading() {
-  loadingState.classList.remove("hidden");
-  resultsSection.classList.add("hidden");
+  loadingState.style.display = "flex";
+  resultsSection.style.display = "none";
   submitBtn.disabled = true;
-  submitBtn.classList.add("opacity-50");
+  submitBtn.style.opacity = "0.6";
 }
 
 function hideLoading() {
-  loadingState.classList.add("hidden");
+  loadingState.style.display = "none";
   submitBtn.disabled = false;
-  submitBtn.classList.remove("opacity-50");
+  submitBtn.style.opacity = "1";
 }
 
 function showError(msg) {
   errorMessage.textContent = msg;
-  errorBanner.classList.remove("hidden");
+  errorBanner.style.display = "flex";
 }
 
 function hideError() {
-  errorBanner.classList.add("hidden");
+  errorBanner.style.display = "none";
 }
 
+/**
+ * Format Helpers
+ */
 function formatNumber(num) {
   if (num === null || num === undefined || isNaN(num)) return "0.00";
   return Number(num).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
