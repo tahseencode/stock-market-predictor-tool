@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MarketPulse — Institutional Market Analytics & Quantitative Forecasts</title>
+  <title>MarketPulse — Cyber Amethyst Quantitative Terminal</title>
   
   <!-- Typography & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,14 +26,14 @@
     <div class="top-header-inner">
       <a href="/" class="brand-wrapper">
         <div class="brand-icon">
-          <i class="fa-solid fa-arrow-trend-up"></i>
+          <i class="fa-solid fa-chart-line"></i>
         </div>
         <div>
           <div class="brand-title">
             MarketPulse
             <span class="brand-badge">Terminal</span>
           </div>
-          <div class="brand-subtitle">Cross-Market Analytics & Quantitative Models</div>
+          <div class="brand-subtitle">Cross-Market Quantitative Engine</div>
         </div>
       </a>
 
@@ -49,7 +49,7 @@
         </div>
         <div id="aiStatusBadge" class="market-indicator">
           <span class="dot live"></span>
-          <span id="aiStatusText">Ensemble Engine Active</span>
+          <span id="aiStatusText">Ensemble ML Online</span>
         </div>
       </div>
     </div>
@@ -92,7 +92,7 @@
       <!-- Quick Watchlist Pills -->
       <div class="watchlist-bar">
         <span class="watchlist-label">
-          <i class="fa-solid fa-bookmark"></i> Watchlist:
+          <i class="fa-solid fa-bolt" style="color: var(--neon-green);"></i> Watchlist:
         </span>
         
         <!-- Indian Equities -->
@@ -292,7 +292,7 @@
             <div class="corridor-box">
               <div class="corridor-header">
                 <span class="corridor-title">
-                  <i class="fa-solid fa-shield-halved" style="color: var(--blue);"></i>
+                  <i class="fa-solid fa-shield-halved" style="color: var(--neon-green);"></i>
                   Expected Next Session Band:
                 </span>
                 <span class="corridor-values">
@@ -315,16 +315,16 @@
             <div class="metric-grid-4">
               <div class="metric-tile">
                 <span class="metric-tile-label">Directional Hit Rate</span>
-                <span id="hitRateText" class="metric-tile-value" style="color: var(--green);">54.1%</span>
+                <span id="hitRateText" class="metric-tile-value" style="color: var(--neon-green);">54.1%</span>
                 <div class="meter-track">
-                  <div id="hitRateBar" class="meter-fill" style="width: 54.1%; background-color: var(--green);"></div>
+                  <div id="hitRateBar" class="meter-fill" style="width: 54.1%; background-color: var(--neon-green);"></div>
                 </div>
                 <span class="metric-tile-sub">Out-of-sample directional win rate</span>
               </div>
 
               <div class="metric-tile">
                 <span class="metric-tile-label">Price Accuracy (MAPE)</span>
-                <span id="mapeText" class="metric-tile-value" style="color: var(--cyan);">1.04%</span>
+                <span id="mapeText" class="metric-tile-value" style="color: var(--purple-bright);">1.04%</span>
                 <span class="metric-tile-sub">Average historical variance</span>
               </div>
 
@@ -336,14 +336,14 @@
 
               <div class="metric-tile">
                 <span class="metric-tile-label">Average True Range (ATR)</span>
-                <span id="atrText" class="metric-tile-value">₹32.35</span>
+                <span id="atrText" class="metric-tile-value" style="color: var(--text-white);">₹32.35</span>
                 <span class="metric-tile-sub">Daily volatility spread</span>
               </div>
             </div>
 
             <!-- Ensemble Specification Strip -->
             <div style="font-size: 11px; color: var(--text-muted); padding-top: 10px; border-top: 1px solid var(--border-subtle);">
-              Architecture: <b style="color: var(--text-secondary);">RandomForest</b> (150 estimators) combined with <b style="color: var(--text-secondary);">GradientBoosting</b> (100 estimators), trained exclusively on stationary return ratios.
+              Architecture: <b style="color: var(--purple-bright);">RandomForest</b> (150 estimators) combined with <b style="color: var(--purple-bright);">GradientBoosting</b> (100 estimators), trained exclusively on stationary return ratios.
             </div>
           </div>
         </div>
@@ -359,25 +359,25 @@
             <div class="metric-grid-4">
               <div class="metric-tile">
                 <span class="metric-tile-label">Market Capitalization</span>
-                <span id="marketCapText" class="metric-tile-value">--</span>
+                <span id="marketCapText" class="metric-tile-value" style="color: var(--text-white);">--</span>
                 <span class="metric-tile-sub">Total enterprise equity value</span>
               </div>
 
               <div class="metric-tile">
                 <span class="metric-tile-label">Trailing P/E Ratio</span>
-                <span id="peRatioText" class="metric-tile-value">--</span>
+                <span id="peRatioText" class="metric-tile-value" style="color: var(--purple-bright);">--</span>
                 <span class="metric-tile-sub">Price to Earnings multiple</span>
               </div>
 
               <div class="metric-tile">
                 <span class="metric-tile-label">Beta (Systematic Risk)</span>
-                <span id="betaText" class="metric-tile-value">--</span>
+                <span id="betaText" class="metric-tile-value" style="color: var(--text-white);">--</span>
                 <span class="metric-tile-sub">Sensitivity versus benchmark</span>
               </div>
 
               <div class="metric-tile">
                 <span class="metric-tile-label">Dividend Yield</span>
-                <span id="divYieldText" class="metric-tile-value">--</span>
+                <span id="divYieldText" class="metric-tile-value" style="color: var(--neon-green);">--</span>
                 <span class="metric-tile-sub">Annual distribution yield</span>
               </div>
             </div>
@@ -385,9 +385,9 @@
             <!-- 52-Week Range Bar -->
             <div class="range-bar-wrapper">
               <div class="range-bar-labels">
-                <span>52W Low: <b id="low52Text" class="mono-num" style="color: var(--text-primary);">--</b></span>
-                <span style="font-weight: 600; color: var(--text-secondary);">52-Week Trading Range</span>
-                <span>52W High: <b id="high52Text" class="mono-num" style="color: var(--text-primary);">--</b></span>
+                <span>52W Low: <b id="low52Text" class="mono-num" style="color: var(--magenta-bright);">--</b></span>
+                <span style="font-weight: 700; color: var(--purple-bright);">52-Week Trading Range</span>
+                <span>52W High: <b id="high52Text" class="mono-num" style="color: var(--neon-green);">--</b></span>
               </div>
               <div class="range-bar-track">
                 <div id="range52Bar" class="range-bar-fill" style="left: 0%; width: 50%;"></div>
@@ -455,9 +455,9 @@
               <div class="metric-tile">
                 <span class="metric-tile-label">
                   <span>Relative Strength Index (RSI 14)</span>
-                  <span id="rsiStatus" class="meta-badge">Neutral</span>
+                  <span id="rsiStatus" class="meta-badge" style="color: var(--neon-green); border-color: rgba(0, 255, 102, 0.3);">Neutral</span>
                 </span>
-                <span id="rsiValue" class="metric-tile-value">54.2</span>
+                <span id="rsiValue" class="metric-tile-value" style="color: var(--text-white);">54.2</span>
                 <span class="metric-tile-sub">Oversold &lt;30 · Neutral 30-70 · Overbought &gt;70</span>
               </div>
 
@@ -465,9 +465,9 @@
               <div class="metric-tile">
                 <span class="metric-tile-label">
                   <span>Stochastic Oscillator (%K / %D)</span>
-                  <span id="stochStatus" class="meta-badge">Bullish</span>
+                  <span id="stochStatus" class="meta-badge" style="color: var(--purple-bright); border-color: var(--purple-border);">Bullish</span>
                 </span>
-                <span id="stochValue" class="metric-tile-value">72.4 / 68.1</span>
+                <span id="stochValue" class="metric-tile-value" style="color: var(--text-white);">72.4 / 68.1</span>
                 <span class="metric-tile-sub">Fast momentum crossover confirmation</span>
               </div>
 
@@ -475,8 +475,8 @@
               <div class="metric-tile">
                 <span class="metric-tile-label">20-Day Swing Extremes</span>
                 <div style="display: flex; justify-content: space-between; margin-top: 4px;">
-                  <span style="font-size: 12px; color: var(--red);">High: <b id="swingHigh20d" class="mono-num">--</b></span>
-                  <span style="font-size: 12px; color: var(--green);">Low: <b id="swingLow20d" class="mono-num">--</b></span>
+                  <span style="font-size: 12px; color: var(--magenta-bright);">High: <b id="swingHigh20d" class="mono-num">--</b></span>
+                  <span style="font-size: 12px; color: var(--neon-green);">Low: <b id="swingLow20d" class="mono-num">--</b></span>
                 </div>
               </div>
             </div>
@@ -490,11 +490,11 @@
 
               <div class="metric-tile">
                 <span class="metric-tile-label">Consensus Stance</span>
-                <span id="consensusBadge" class="metric-tile-value" style="font-size: 16px; color: var(--green);">Bullish Setup</span>
+                <span id="consensusBadge" class="metric-tile-value" style="font-size: 16px; color: var(--neon-green);">Bullish Setup</span>
                 <div style="display: flex; gap: 12px; margin-top: 8px; font-size: 12px;">
-                  <span style="color: var(--green); font-weight: 600;"><span id="bullishCount">0</span> Buy</span>
-                  <span style="color: var(--amber); font-weight: 600;"><span id="neutralCount">0</span> Neutral</span>
-                  <span style="color: var(--red); font-weight: 600;"><span id="bearishCount">0</span> Sell</span>
+                  <span style="color: var(--neon-green); font-weight: 700;"><span id="bullishCount">0</span> Buy</span>
+                  <span style="color: var(--purple-bright); font-weight: 700;"><span id="neutralCount">0</span> Neutral</span>
+                  <span style="color: var(--magenta-bright); font-weight: 700;"><span id="bearishCount">0</span> Sell</span>
                 </div>
               </div>
             </div>
@@ -508,7 +508,7 @@
             <div class="card-header-row" style="margin-bottom: 0;">
               <div class="card-title-group">
                 <h3 class="card-title">
-                  <i class="fa-solid fa-pen-to-square" style="color: var(--blue);"></i>
+                  <i class="fa-solid fa-pen-to-square" style="color: var(--neon-green);"></i>
                   <span>Market Desk Research Copilot</span>
                 </h3>
                 <p class="card-subtitle">Inquire about target reasoning, risk parameters, or valuation nuances</p>
@@ -558,7 +558,7 @@
     <!-- Institutional Market Reality Disclosure Footer -->
     <footer class="app-footer">
       <div class="footer-disclosure-title">
-        <i class="fa-solid fa-shield" style="color: var(--amber);"></i>
+        <i class="fa-solid fa-shield" style="color: var(--purple-bright);"></i>
         <span>Market Mechanics & Quantitative Model Disclosure</span>
       </div>
       <p>

@@ -1,6 +1,6 @@
 /**
  * MarketPulse Terminal — Application Logic
- * Institutional Multi-Timeframe Quantitative Analytics
+ * Cyber Amethyst Edition (White, Purple & Neon Green)
  */
 
 let activeStockData = null;
@@ -106,7 +106,7 @@ async function fetchSystemStatus() {
       if (data.gemini_connected) {
         statusText.textContent = "Gemini Analyst Online";
       } else {
-        statusText.textContent = "Ensemble Engine Active";
+        statusText.textContent = "Ensemble ML Online";
       }
     }
   } catch (err) {
@@ -344,11 +344,11 @@ function renderStockData(data) {
   if (isUp) {
     returnPill.className = "change-pill";
     returnPill.innerHTML = `<i class="fa-solid fa-arrow-trend-up"></i> <span>+${data.predicted_return_pct.toFixed(2)}%</span>`;
-    predictedPriceEl.style.color = "var(--green)";
+    predictedPriceEl.style.color = "var(--neon-green)";
   } else {
     returnPill.className = "change-pill negative";
     returnPill.innerHTML = `<i class="fa-solid fa-arrow-trend-down"></i> <span>${data.predicted_return_pct.toFixed(2)}%</span>`;
-    predictedPriceEl.style.color = "var(--red)";
+    predictedPriceEl.style.color = "var(--magenta-bright)";
   }
 
   // Prices (5-Day Swing Target)
@@ -359,11 +359,11 @@ function renderStockData(data) {
     if (is5dUp) {
       return5dPill.className = "change-pill";
       return5dPill.innerHTML = `<span>+${data.predicted_5d_return_pct.toFixed(2)}%</span>`;
-      predicted5dPriceEl.style.color = "var(--cyan)";
+      predicted5dPriceEl.style.color = "var(--purple-bright)";
     } else {
       return5dPill.className = "change-pill negative";
       return5dPill.innerHTML = `<span>${data.predicted_5d_return_pct.toFixed(2)}%</span>`;
-      predicted5dPriceEl.style.color = "var(--red)";
+      predicted5dPriceEl.style.color = "var(--magenta-bright)";
     }
   }
 
@@ -407,32 +407,32 @@ function renderStockData(data) {
   const score = (data.bullish_count || 0) - (data.bearish_count || 0);
   if (score >= 3) {
     consensusBadge.textContent = "Strong Bullish";
-    consensusBadge.style.color = "var(--green)";
+    consensusBadge.style.color = "var(--neon-green)";
   } else if (score >= 1) {
     consensusBadge.textContent = "Bullish Setup";
-    consensusBadge.style.color = "var(--green)";
+    consensusBadge.style.color = "var(--neon-green)";
   } else if (score <= -3) {
     consensusBadge.textContent = "Strong Bearish";
-    consensusBadge.style.color = "var(--red)";
+    consensusBadge.style.color = "var(--magenta-bright)";
   } else if (score <= -1) {
     consensusBadge.textContent = "Bearish Setup";
-    consensusBadge.style.color = "var(--red)";
+    consensusBadge.style.color = "var(--magenta-bright)";
   } else {
     consensusBadge.textContent = "Neutral / Consolidation";
-    consensusBadge.style.color = "var(--amber)";
+    consensusBadge.style.color = "var(--purple-bright)";
   }
 
   // Technical Indicators: RSI
   rsiValue.textContent = data.rsi.toFixed(1);
   if (data.rsi < 30) {
     rsiStatus.textContent = "Oversold";
-    rsiStatus.style.color = "var(--green)";
+    rsiStatus.style.color = "var(--neon-green)";
   } else if (data.rsi > 70) {
     rsiStatus.textContent = "Overbought";
-    rsiStatus.style.color = "var(--red)";
+    rsiStatus.style.color = "var(--magenta-bright)";
   } else {
     rsiStatus.textContent = "Neutral";
-    rsiStatus.style.color = "var(--text-secondary)";
+    rsiStatus.style.color = "var(--purple-bright)";
   }
 
   // Stochastic Oscillator
@@ -440,13 +440,13 @@ function renderStockData(data) {
     stochValue.textContent = `${data.stoch_k.toFixed(1)} / ${data.stoch_d.toFixed(1)}`;
     if (data.stoch_k > data.stoch_d && data.stoch_k < 80) {
       stochStatus.textContent = "Bullish Cross";
-      stochStatus.style.color = "var(--green)";
+      stochStatus.style.color = "var(--neon-green)";
     } else if (data.stoch_k < data.stoch_d && data.stoch_k > 20) {
       stochStatus.textContent = "Bearish Cross";
-      stochStatus.style.color = "var(--red)";
+      stochStatus.style.color = "var(--magenta-bright)";
     } else {
       stochStatus.textContent = "Neutral";
-      stochStatus.style.color = "var(--text-secondary)";
+      stochStatus.style.color = "var(--purple-bright)";
     }
   }
 
@@ -495,7 +495,7 @@ function renderFilteredChart(chartData, currencySym, timeframe) {
 }
 
 /**
- * Render Chart.js Chart
+ * Render Chart.js Chart (Cyber Amethyst Edition)
  */
 function renderChart(dates, histPrices, sma20, sma50, targetData, volume, currencySym) {
   const canvas = document.getElementById("priceChart");
@@ -506,16 +506,16 @@ function renderChart(dates, histPrices, sma20, sma50, targetData, volume, curren
     priceChartInstance.destroy();
   }
 
-  // Volume Bar Colors: Green for up sessions, Red for down sessions
+  // Volume Bar Colors: Neon Green for up sessions, Neon Magenta for down sessions
   const volumeColors = [];
   for (let i = 0; i < histPrices.length - 1; i++) {
     if (i === 0 || histPrices[i] >= histPrices[i - 1]) {
-      volumeColors.push("rgba(16, 185, 129, 0.22)");
+      volumeColors.push("rgba(0, 255, 102, 0.25)");
     } else {
-      volumeColors.push("rgba(244, 63, 94, 0.22)");
+      volumeColors.push("rgba(255, 42, 109, 0.25)");
     }
   }
-  volumeColors.push("rgba(6, 182, 212, 0.22)");
+  volumeColors.push("rgba(168, 85, 247, 0.35)");
 
   priceChartInstance = new Chart(ctx, {
     data: {
@@ -525,14 +525,14 @@ function renderChart(dates, histPrices, sma20, sma50, targetData, volume, curren
           type: "line",
           label: "Close Price",
           data: histPrices,
-          borderColor: "#10b981",
-          backgroundColor: "rgba(16, 185, 129, 0.05)",
-          borderWidth: 2,
+          borderColor: "#00ff66",
+          backgroundColor: "rgba(0, 255, 102, 0.07)",
+          borderWidth: 2.2,
           fill: true,
           tension: 0.1,
           pointRadius: 0,
-          pointHoverRadius: 5,
-          pointHoverBackgroundColor: "#10b981",
+          pointHoverRadius: 6,
+          pointHoverBackgroundColor: "#00ff66",
           pointHoverBorderColor: "#ffffff",
           yAxisID: "y",
         },
@@ -540,8 +540,8 @@ function renderChart(dates, histPrices, sma20, sma50, targetData, volume, curren
           type: "line",
           label: "SMA 20",
           data: sma20,
-          borderColor: "#f59e0b",
-          borderWidth: 1.5,
+          borderColor: "#c084fc",
+          borderWidth: 1.6,
           borderDash: [4, 4],
           fill: false,
           pointRadius: 0,
@@ -552,7 +552,7 @@ function renderChart(dates, histPrices, sma20, sma50, targetData, volume, curren
           type: "line",
           label: "SMA 50",
           data: sma50,
-          borderColor: "#8b5cf6",
+          borderColor: "#ffffff",
           borderWidth: 1.5,
           borderDash: [6, 4],
           fill: false,
@@ -564,14 +564,14 @@ function renderChart(dates, histPrices, sma20, sma50, targetData, volume, curren
           type: "line",
           label: "Model Target",
           data: targetData,
-          borderColor: "#06b6d4",
-          borderWidth: 2,
+          borderColor: "#38bdf8",
+          borderWidth: 2.2,
           borderDash: [3, 3],
           fill: false,
-          pointRadius: (ctx) => (ctx.dataIndex === dates.length - 1 ? 6 : 0),
-          pointBackgroundColor: "#06b6d4",
+          pointRadius: (ctx) => (ctx.dataIndex === dates.length - 1 ? 7 : 0),
+          pointBackgroundColor: "#00ff66",
           pointBorderColor: "#ffffff",
-          pointBorderWidth: 2,
+          pointBorderWidth: 2.5,
           yAxisID: "y",
         },
         {
@@ -595,12 +595,12 @@ function renderChart(dates, histPrices, sma20, sma50, targetData, volume, curren
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: "rgba(18, 21, 30, 0.95)",
-          titleColor: "#f8fafc",
-          bodyColor: "#94a3b8",
-          borderColor: "rgba(255, 255, 255, 0.12)",
+          backgroundColor: "rgba(18, 8, 38, 0.96)",
+          titleColor: "#ffffff",
+          bodyColor: "#e2d9f3",
+          borderColor: "rgba(168, 85, 247, 0.45)",
           borderWidth: 1,
-          padding: 10,
+          padding: 12,
           titleFont: { family: "'Plus Jakarta Sans', sans-serif", size: 12, weight: "bold" },
           bodyFont: { family: "'JetBrains Mono', monospace", size: 12 },
           callbacks: {
@@ -617,14 +617,14 @@ function renderChart(dates, histPrices, sma20, sma50, targetData, volume, curren
       },
       scales: {
         x: {
-          grid: { color: "rgba(255, 255, 255, 0.05)" },
-          ticks: { color: "#64748b", font: { size: 11, family: "'JetBrains Mono', monospace" }, maxTicksLimit: 8 }
+          grid: { color: "rgba(168, 85, 247, 0.1)" },
+          ticks: { color: "#a79bc2", font: { size: 11, family: "'JetBrains Mono', monospace" }, maxTicksLimit: 8 }
         },
         y: {
           position: "right",
-          grid: { color: "rgba(255, 255, 255, 0.05)" },
+          grid: { color: "rgba(168, 85, 247, 0.1)" },
           ticks: {
-            color: "#94a3b8",
+            color: "#ffffff",
             font: { size: 11, family: "'JetBrains Mono', monospace" },
             callback: (val) => `${currencySym}${formatNumber(val)}`
           }
@@ -679,7 +679,7 @@ function appendChatMessage(text, role, isPending = false) {
   } else {
     bubble.innerHTML = `
       <span class="chat-sender">Market Desk Analyst</span>
-      ${isPending ? `<i class="fa-solid fa-spinner fa-spin" style="color: var(--blue); margin-right: 6px;"></i> ${escapeHtml(text)}` : formatMarkdown(text)}
+      ${isPending ? `<i class="fa-solid fa-spinner fa-spin" style="color: var(--neon-green); margin-right: 6px;"></i> ${escapeHtml(text)}` : formatMarkdown(text)}
     `;
   }
 
